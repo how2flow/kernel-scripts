@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# for build various linux kernel (cross-compile).
+# this script has to move in kernel's top path.
+# by jkhgit.
+
+# path
+TOP_PATH="$( cd "$(dirname $0)" ; pwd -P)"
+OUT_PATH=${TOP_PATH}/out
+LOG_PATH=${TOP_PATH}/build_log.txt
+
+# params
+M_PARAMS="" # e.g "zImage modules dtbs ..."
+
+# options
+for opt in $@; do
+  case ${opt} in
+    --pre=*) # Add "-save-temps=objs" in KBUILD_CFLAGS of Makefile.
+    PREPROCESS_FILE=${opt#*=}
+    echo "preprocess file:${PREPROCESS_FILE}"
+    ;;
+    *)
+    ;;
+  esac
+done
+
+echo "set architecture"
+read -r -p "Input architecure: " arch
+
+case ${arch} in
+  arm)
+  export ARCH="arm"
+  export CROSS_COMPILE="arm-linux-gnueabi-"
+  ;;
+  armhf)
+  export ARCH="arm"
+  export CROSS_COMPILE="arm-linux-gnueabihf-"
+  ;;
+  arm64)
+  export ARCH="arm64"
+  export CROSS_COMPILE="aarch64-linux-gnu-"
+  ;;
+esac
+
+KERNEL=vmlinuz-$(uname -r)
+
+echo "[parameters]"
+echo "ARCH=${ARCH}"
+echo "CROSS_COMPILE=${CROSS_COMPILE}"
+echo "KERNEL=${KERNEL}"
+
+echo "[make defconfig]"
+read -r -p "Input kernel defconfig: " config
+echo "config=${config}"
+make O=${OUT_PATH} ${config}
+
+echo "[kernel build]"
+make ${PREPROCESS_FILE} O=${OUT_PATH} ${M_PARAMS} -j4 2>&1 | tee ${LOG_PATH}
+
+# vim: ft=sh ts=2 sw=2 sts=2 et
