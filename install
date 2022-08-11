@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# for install linux kernel (native).
+# this script has to move in kernel's top path.
+# by jkhgit.
+
+# path
+TOP_PATH="$( cd "$(dirname $0)" ; pwd -P)"
+OUT_PATH=${TOP_PATH}/out
+
+echo "set architecture"
+ARCH=$(dpkg --print-architecture)
+case ${ARCH} in
+  arm|armhf)
+  ARCH=arm
+  ;;
+  arm64)
+  ARCH=arm64
+  ;;
+esac
+
+KERNEL=vmlinuz-$(cat ${OUT_PATH}/include/config/kernel.release)
+
+echo "[kernel install]"
+sudo make O=${OUT_PATH} modules_install
+sudo make O=${OUT_PATH} install # then, copy ${OUT_PATH}/arch/${ARCH}/boot/${image_file} to /boot
+
+# vim: ft=sh ts=2 sw=2 sts=2 et
