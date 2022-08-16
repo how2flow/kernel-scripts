@@ -22,7 +22,8 @@ esac
 KERNEL=vmlinuz-$(cat ${OUT_PATH}/include/config/kernel.release)
 
 echo "[kernel install]"
-sudo make O=${OUT_PATH} modules_install
-sudo make O=${OUT_PATH} install # then, copy ${OUT_PATH}/arch/${ARCH}/boot/${image_file} to /boot
+cd ${OUT_PATH}
+sudo make modules_install
+sudo make install # then, copy ${OUT_PATH}/arch/${ARCH}/boot/${image_file} to /boot
 
 # vim: ft=sh ts=2 sw=2 sts=2 et
