@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# image file -> block device
+# for mount linux kernel image file.
+# by steve jeong.
+
+BLOCK="$(sudo losetup -f)"
+TOP_PATH="$( cd "$(dirname $0)" ; pwd -P)"
+
+if [ ! $# -eq 1 ]; then
+  echo "Invalid format"
+  echo ""
+  echo "Usage:"
+  echo ""
+  echo "    losetup \${img_file}"
+  exit 1
+fi
+
+[ ! -d tmp ] && mkdir -p tmp
+sudo losetup ${BLOCK} $1 # delete: sudo losetup -d ${BLOCK}
+sudo partx -v --add ${BLOCK}
+
+echo "..."
+echo "..."
+echo "===================================="
+echo "Complete losetup image file"
+echo ""
+echo "Usage:"
+echo ""
+echo "    mount \"${BLOCK}p#\" $(pwd)/tmp"
+echo "===================================="
+
+# vim: ft=sh ts=2 sw=2 sts=2 et
