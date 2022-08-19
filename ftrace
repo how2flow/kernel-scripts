@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# ftracing script.
+# kernel function call stack. run with root permission.
+# check kernel config...
+# CONFIG_FTRACE=y
+# CONFIG_DYNAMIC_FTRACE=y
+# CONFIG_FUNCTION_TRACER=y
+# CONFIG_FUNCTION_GRAPH_TRACER=y
+# CONFIG_IRQSOFF_TRACER=y
+# CONFIG_SCHED_TRACER=y
+# CONFIG_FUNCTION_PROFILER=y
+# ...
+# by steve jeong.
+
+PREFIX=/sys/kernel/debug/tracing
+# evnet path
+E_IRQ=${PREFIX}/events/irq
+E_SCHD=${PREFIX}/events/sched
+E_SYS=${PREFIX}/evnets/syscalls
+
+echo 0 > "${PREFIX}/tracing_on"
+sleep 1
+echo "tracing off"
+
+echo 0 > "${PREFIX}/events/enable"
+sleep 1
+echo "events off"
+
+echo "function" > "${PREFIX}/current_tracer"
+sleep 1
+echo "function tracer enabled"
+
+echo "input example: \"hrtimer_interrupt\" (kernel function name.)"
+# filter check: $ cat /sys/kernel/debug/tracing/available_filter_functions
+read -r -p "input function filter:" filter
+echo ${filter} > "${PREFIX}/set_ftrace_filter"
+[ ! "$?" == 0 ] && exit 1 # TODO: Handle exceptions more reliably.
+sleep 1
+echo "set_ftrace_filter enabled"
+
+# events
+echo 1 > "${E_IRQ}/irq_handler_entry/enable"
+echo 1 > "${E_IRQ}/irq_handler_exit/enable"
+echo "event enable"
+
+echo 1 > "${PREFIX}/options/func_stack_trace"
+echo 1 > "${PREFIX}/options/sym-offset"
+echo "function stack trace enabled"
+
+echo "input example: \"ls\" (input terminal command for call function stack.)"
+read -r -p "input trigger cmd:" cmd
+
+echo "tracing on" # switch echo message for tracing only cmd.
+echo 1 > "${PREFIX}/tracing_on"
+
+echo "---cmd start---"
+${cmd}
+echo "---cmd end---"
+
+echo 0 > "${PREFIX}/tracing_on"
+echo "tracing off"
+echo "tracing info..."
+sleep 3
+
+cp "${PREFIX}/trace" .
+mv trace ftrace.log
+sudo chmod +r ftrace.log
+
+# vim: ft=sh ts=2 sw=2 sts=2 et
