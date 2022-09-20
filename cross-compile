@@ -47,7 +47,7 @@ KERNEL=vmlinuz-$(uname -r)
 echo "[parameters]"
 echo "ARCH=${ARCH}"
 echo "CROSS_COMPILE=${CROSS_COMPILE}"
-echo "KERNEL=${KERNEL}"
+echo "HOST_KERNEL=${KERNEL}"
 
 echo "[make defconfig]"
 read -r -p "Input kernel defconfig: " config
