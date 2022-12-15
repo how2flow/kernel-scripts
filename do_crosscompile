@@ -10,7 +10,7 @@ OUT_PATH=${TOP_PATH}/out
 LOG_PATH=${TOP_PATH}/build_log.txt
 
 # params
-M_PARAMS="" # e.g "zImage modules dtbs ..."
+M_PARAMS=$1 # e.g "zImage modules dtbs ..."
 
 # options
 for opt in $@; do
@@ -42,12 +42,9 @@ case ${arch} in
   ;;
 esac
 
-KERNEL=vmlinuz-$(uname -r)
-
 echo "[parameters]"
 echo "ARCH=${ARCH}"
 echo "CROSS_COMPILE=${CROSS_COMPILE}"
-echo "HOST_KERNEL=${KERNEL}"
 
 echo "[make defconfig]"
 read -r -p "Input kernel defconfig: " config
