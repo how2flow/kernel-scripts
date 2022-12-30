@@ -2,7 +2,7 @@
 
 # for install linux kernel (native).
 # this script has to move in kernel's top path.
-# by jkhgit.
+# by steve jeong.
 
 # path
 TOP_PATH="$( cd "$(dirname $0)" ; pwd -P)"
