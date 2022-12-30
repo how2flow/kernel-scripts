@@ -1,3 +1,5 @@
 # kernel
+- Automation kernel Scripts.
 
-Automation kernel Scripts.
+### contact:
+e-mail: <how2soft@gmail.com>
