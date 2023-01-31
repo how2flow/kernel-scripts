@@ -48,7 +48,8 @@ echo "CROSS_COMPILE=${CROSS_COMPILE}"
 
 echo "[make defconfig]"
 read -r -p "Input kernel defconfig: " config
-echo "config=${config}"
+echo "config=${config}" && \
+  sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' arch/${ARCH}/configs/${config}
 make O=${OUT_PATH} ${config}
 
 echo "[kernel build]"
