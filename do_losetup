@@ -7,17 +7,9 @@
 BLOCK="$(sudo losetup -f)"
 TOP_PATH="$( cd "$(dirname $0)" ; pwd -P)"
 
-if [ ! $# -eq 1 ]; then
-  echo "Invalid format"
-  echo ""
-  echo "Usage:"
-  echo ""
-  echo "    losetup \${img_file}"
-  exit 1
-fi
-
 [ ! -d tmp ] && mkdir -p tmp
-sudo losetup ${BLOCK} $1 # delete: sudo losetup -d ${BLOCK}
+read -r -p "Target Image file:" img
+sudo losetup ${BLOCK} ${img} # delete: sudo losetup -d ${BLOCK}
 sudo partx -v --add ${BLOCK}
 
 echo "..."
