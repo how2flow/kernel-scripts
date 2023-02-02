@@ -1,0 +1,17 @@
+# [field: general]
+Source: kernel-scripts
+Section: misc
+Priority: optional
+Maintainer: Steve Jeong <how2soft@gmail.com>
+Build-Depends: debhelper (>= 10)
+
+# [field: binary packages]
+# Package 1
+Package: kernel-scripts
+Architecture: any
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Automation kernel scripts.
+
+# Package 2
+# ...

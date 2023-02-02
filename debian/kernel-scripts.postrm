@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+  purge)
+    rm -rf /usr/bin/do_crosscompile
+    rm -rf /usr/bin/do_ftrace
+    rm -rf /usr/bin/do_losetup
+    rm -rf /usr/bin/do_nativeinstall
+  ;;
+
+  remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+  ;;
+
+  *)
+    echo "postrm called with unknown argument \`$1'" >&2
+    exit 1
+  ;;
+esac
