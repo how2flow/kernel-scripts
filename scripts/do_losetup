@@ -9,7 +9,7 @@ TOP_PATH="$( cd "$(dirname $0)" ; pwd -P)"
 
 [ ! -d tmp ] && mkdir -p tmp
 read -r -p "Target Image file:" img
-sudo losetup ${BLOCK} ${img} # delete: sudo losetup -d ${BLOCK}
+sudo losetup ${BLOCK} ${img} # delete: losetup -d ${BLOCK}
 sudo partx -v --add ${BLOCK}
 
 echo "..."

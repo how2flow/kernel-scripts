@@ -1,0 +1,7 @@
+#!/bin/sh
+
+SCRIPTS="`ls -p /usr/bin/do_*`"
+
+for idx in ${SCRIPTS}; do
+  chmod +x ${idx}
+done

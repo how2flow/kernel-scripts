@@ -5,7 +5,7 @@
 # written by Steve Jeong.
 
 # path
-TOP_PATH="$( cd "$(dirname $0)" ; pwd -P)"
+TOP_PATH="`pwd -P`"
 OUT_PATH=${TOP_PATH}/out
 
 echo "set architecture"
@@ -23,7 +23,7 @@ KERNEL=vmlinuz-$(cat ${OUT_PATH}/include/config/kernel.release)
 
 echo "[kernel install]"
 cd ${OUT_PATH}
-sudo make modules_install
-sudo make install # then, copy ${OUT_PATH}/arch/${ARCH}/boot/${image_file} to /boot
+make modules_install
+make install
 
 # vim: ft=sh ts=2 sw=2 sts=2 et

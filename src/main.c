@@ -62,11 +62,13 @@ void Usage()
 	printf("\n");
 	printf("                ftrace: during the interaction, you must write the exact name of the function\n");
 	printf("                        you want to track within the kernel source. An untraceable function exists.\n");
+	printf("                        need 'root' or 'sudo' privileges.\n");
 	printf("\n");
 	printf("                install: kernel build and install.\n");
 	printf("                         before using it, move to the root path of the kernel source.\n");
 	printf("\n");
 	printf("                losetup: losetup file in loop device.\n");
+	printf("                         need 'root' or 'sudo' privileges.\n");
 	printf("\n");
 	printf("-h, --help: print Usage.\n");
 	printf("\n\n");

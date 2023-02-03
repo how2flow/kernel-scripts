@@ -19,51 +19,57 @@ E_IRQ=${PREFIX}/events/irq
 E_SCHD=${PREFIX}/events/sched
 E_SYS=${PREFIX}/evnets/syscalls
 
-echo 0 > "${PREFIX}/tracing_on"
+# EUID
+#if [ $EUID -ne 0 ]; then
+#  echo "please run as 'root' or 'sudo'"
+#  exit
+#fi
+
+echo 0 | sudo tee "${PREFIX}/tracing_on"
 sleep 1
 echo "tracing off"
 
-echo 0 > "${PREFIX}/events/enable"
+echo 0 | sudo tee "${PREFIX}/events/enable"
 sleep 1
 echo "events off"
 
-echo "function" > "${PREFIX}/current_tracer"
+echo "function" | sudo tee "${PREFIX}/current_tracer"
 sleep 1
 echo "function tracer enabled"
 
 echo "input example: \"hrtimer_interrupt\" (kernel function name.)"
 # filter check: $ cat /sys/kernel/debug/tracing/available_filter_functions
 read -r -p "input function filter:" filter
-echo ${filter} > "${PREFIX}/set_ftrace_filter"
+echo ${filter} | sudo tee "${PREFIX}/set_ftrace_filter"
 [ ! "$?" == 0 ] && exit 1 # TODO: Handle exceptions more reliably.
 sleep 1
 echo "set_ftrace_filter enabled"
 
 # events
-echo 1 > "${E_IRQ}/irq_handler_entry/enable"
-echo 1 > "${E_IRQ}/irq_handler_exit/enable"
+echo 1 | sudo tee "${E_IRQ}/irq_handler_entry/enable"
+echo 1 | sudo tee "${E_IRQ}/irq_handler_exit/enable"
 echo "event enable"
 
-echo 1 > "${PREFIX}/options/func_stack_trace"
-echo 1 > "${PREFIX}/options/sym-offset"
+echo 1 | sudo tee "${PREFIX}/options/func_stack_trace"
+echo 1 | sudo tee "${PREFIX}/options/sym-offset"
 echo "function stack trace enabled"
 
 echo "input example: \"ls\" (input terminal command for call function stack.)"
 read -r -p "input trigger cmd:" cmd
 
 echo "tracing on" # switch echo message for tracing only cmd.
-echo 1 > "${PREFIX}/tracing_on"
+echo 1 | sudo tee "${PREFIX}/tracing_on"
 
 echo "---cmd start---"
 ${cmd}
 echo "---cmd end---"
 
-echo 0 > "${PREFIX}/tracing_on"
+echo 0 | sudo tee "${PREFIX}/tracing_on"
 echo "tracing off"
 echo "tracing info..."
 sleep 3
 
-cp "${PREFIX}/trace" .
+sudo cp "${PREFIX}/trace" .
 mv trace trace.log
 sudo chmod +r trace.log
 
