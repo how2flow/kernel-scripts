@@ -2,7 +2,7 @@
 
 # image file -> block device
 # for mount linux kernel image file.
-# by steve jeong.
+# written by Steve Jeong.
 
 BLOCK="$(sudo losetup -f)"
 TOP_PATH="$( cd "$(dirname $0)" ; pwd -P)"
