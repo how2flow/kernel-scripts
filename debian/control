@@ -3,6 +3,7 @@ Source: kernel-scripts
 Section: misc
 Priority: optional
 Maintainer: Steve Jeong <how2soft@gmail.com>
+Standards-Version: 2.0.0
 Build-Depends: debhelper (>= 10)
 
 # [field: binary packages]

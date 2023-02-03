@@ -45,7 +45,7 @@ echo "[kernel config]"
 read -r -p "Input kernel defconfig: " config
 echo "config=${config}" && \
   sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' arch/${ARCH}/configs/${config}
-make O=${OUT_PATH} ${config}
+sudo make O=${OUT_PATH} ${config}
 
 echo ""
 echo "[kernel build]"
@@ -54,6 +54,6 @@ read -r -p "Input build target: " targets
 if [ ${targets} == "all" ]; then
   ${targets}=""
 fi
-make ${PREPROCESS_FILE} O=${OUT_PATH} ${targets} -j4 2>&1 | tee ${LOG_PATH}
+sudo make ${PREPROCESS_FILE} O=${OUT_PATH} ${targets} -j4 2>&1 | tee ${LOG_PATH}
 
 # vim: ft=sh ts=2 sw=2 sts=2 et

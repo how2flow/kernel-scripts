@@ -1,0 +1,11 @@
+#!/bin/sh
+
+GROUP="kernelmanager"
+
+if [ -z "$(cat /etc/group | grep ${GROUP})" ]; then
+  groupadd ${GROUP}
+fi
+
+if [ -z "$(groups ${USER} | grep ${GROUP})" ]; then
+  usermod -a ${USER} -G ${GROUP}
+fi

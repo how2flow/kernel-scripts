@@ -1,1 +1,2 @@
 scripts/*		usr/bin
+etc/sudoers.d/*	etc/sudoers.d
