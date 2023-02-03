@@ -1,3 +1,9 @@
+kernel-scripts (1.2.0) stable; urgency=medium
+
+  * kernel-scripts standard version.
+
+ -- Steve Jeong <how2soft@gmail.com>  Fri, 03 Feb 2023 10:35:25 +0900
+
 kernel-scripts (1.1.0) unstable; urgency=medium
 
   * kernel-scripts initial release.
