@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([kernelscripts], [3.0], [how2soft@gmail.com])
+AC_INIT([kernel-scripts], [3.0], [how2soft@gmail.com])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
 AC_SUBST([EXTRA_CFLAGS], "-Wall -Werror")

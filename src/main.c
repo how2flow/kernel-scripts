@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 	if (argc == 1) {
 		printf("Need options. refer to run with \"--help\".\n");
 		printf("\n");
-		printf("$ kernelscripts --help\n");
+		printf("$ kernel --help\n");
 		return -1;
 	}
 

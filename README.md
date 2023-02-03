@@ -1,11 +1,11 @@
-# kernelscripts
+# kernel-scripts
 - Automation kernel scripts package.
 
 ### install
 ```
 $ sudo add-apt-repository ppa:how2flow/ppa
 $ sudo apt update
-$ sudo apt install kernelscripts
+$ sudo apt install kernel-scripts
 ```
 
 ### contact:
