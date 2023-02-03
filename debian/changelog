@@ -1,3 +1,10 @@
+kernel-scripts (2.0.0) stable; urgency=medium
+
+  * kernel-scripts change standard version.
+  * change "v1.2.0" to "2.y"
+
+ -- Steve Jeong <how2soft@gmail.com>  Fri, 03 Feb 2023 11:03:31 +0900
+
 kernel-scripts (1.2.0) stable; urgency=medium
 
   * kernel-scripts standard version.
