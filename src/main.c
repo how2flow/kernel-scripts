@@ -31,17 +31,47 @@ static struct option lopts[] = {
 
 void run(char *optarg)
 {
+	int ret;
+
 	if (!strcmp(optarg, "crosscompile")) {
-		system("/usr/bin/bash -c do_crosscompile");
+		ret = system("/usr/bin/bash -c do_crosscompile");
+
+		if (ret < 0) {
+			printf("system function error!\n");
+		}
+		else if (ret == 127) {
+			printf("fork and execve error!\n");
+		}
 	}
 	else if (!strcmp(optarg, "ftrace")) {
-		system("/usr/bin/bash -c do_ftrace");
+		ret = system("/usr/bin/bash -c do_ftrace");
+
+		if (ret < 0) {
+			printf("system function error!\n");
+		}
+		else if (ret == 127) {
+			printf("fork and execve error!\n");
+		}
 	}
 	else if (!strcmp(optarg, "install")) {
-		system("/usr/bin/bash -c do_nativeinstall");
+		ret = system("/usr/bin/bash -c do_nativeinstall");
+
+		if (ret < 0) {
+			printf("system function error!\n");
+		}
+		else if (ret == 127) {
+			printf("fork and execve error!\n");
+		}
 	}
 	else if (!strcmp(optarg, "losetup")) {
-		system("/usr/bin/bash -c do_losetup");
+		ret = system("/usr/bin/bash -c do_losetup");
+
+		if (ret < 0) {
+			printf("system function error!\n");
+		}
+		else if (ret == 127) {
+			printf("fork and execve error!\n");
+		}
 	}
 	else {
 		printf("Invalid function\n");
