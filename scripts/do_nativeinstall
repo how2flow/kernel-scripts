@@ -5,7 +5,7 @@
 # written by Steve Jeong.
 
 # path
-TOP_PATH="`pwd -P`"
+TOP_PATH="$(pwd -P)"
 OUT_PATH=${TOP_PATH}/out
 
 echo "set architecture"
