@@ -1,6 +1,12 @@
+kernel-scripts (2.1.1) stable; urgency=medium
+
+  * crosscompile: Add a concise option flag "cc".
+
+ -- Steve Jeong <how2soft@gmail.com>  Mon, 13 Feb 2023 11:24:57 +0900
+
 kernel-scripts (2.1.0) stable; urgency=medium
 
-  * kernel-scripts: improve scripts and Usage. 
+  * kernel-scripts: improve scripts and Usage.
   * Add print error of fork and execve.
 
  -- Steve Jeong <how2soft@gmail.com>  Mon, 06 Feb 2023 09:48:31 +0900
