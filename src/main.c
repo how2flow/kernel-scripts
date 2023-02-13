@@ -33,7 +33,7 @@ void run(char *optarg)
 {
 	int ret;
 
-	if (!strcmp(optarg, "crosscompile")) {
+	if ((!strcmp(optarg, "crosscompile")) || (!strcmp(optarg, "cc"))) {
 		ret = system("/usr/bin/bash -c do_crosscompile");
 
 		if (ret < 0) {
@@ -87,7 +87,7 @@ void Usage()
 	printf("[OPTION]\n");
 	printf("-f, --function: select and run kernel util function.\n");
 	printf("\n");
-	printf("                crosscompile: used when kernel build target and build environment are different.\n");
+	printf("                crosscompile|cc: used when kernel build target and build environment are different.\n");
 	printf("                              before using it, move to the root path of the kernel source.\n");
 	printf("\n");
 	printf("                ftrace: during the interaction, you must write the exact name of the function\n");
