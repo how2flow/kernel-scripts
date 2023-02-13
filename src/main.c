@@ -39,40 +39,52 @@ void run(char *optarg)
 		if (ret < 0) {
 			printf("system function error!\n");
 		}
+
 		else if (ret == 127) {
 			printf("fork and execve error!\n");
 		}
+
 	}
+
 	else if (!strcmp(optarg, "ftrace")) {
 		ret = system("/usr/bin/bash -c do_ftrace");
 
 		if (ret < 0) {
 			printf("system function error!\n");
 		}
+
 		else if (ret == 127) {
 			printf("fork and execve error!\n");
 		}
+
 	}
+
 	else if (!strcmp(optarg, "install")) {
 		ret = system("/usr/bin/bash -c do_nativeinstall");
 
 		if (ret < 0) {
 			printf("system function error!\n");
 		}
+
 		else if (ret == 127) {
 			printf("fork and execve error!\n");
 		}
+
 	}
+
 	else if (!strcmp(optarg, "losetup")) {
 		ret = system("/usr/bin/bash -c do_losetup");
 
 		if (ret < 0) {
 			printf("system function error!\n");
 		}
+
 		else if (ret == 127) {
 			printf("fork and execve error!\n");
 		}
+
 	}
+
 	else {
 		printf("Invalid function\n");
 	}
