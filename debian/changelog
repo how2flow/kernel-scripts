@@ -1,3 +1,9 @@
+kernel-scripts (2.2.0-1) stable; urgency=medium
+
+  * Release version 2.2.0 (git tag version).
+
+ -- Steve Jeong <how2soft@gmail.com>  Mon, 13 Mar 2023 18:20:26 +0900
+
 kernel-scripts (2.2.0) stable; urgency=medium
 
   * Release version 2.2.0
