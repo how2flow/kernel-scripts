@@ -21,6 +21,12 @@
 #include <string.h>
 #include <unistd.h>
 
+#define HASH_ERROR -1
+#define HASH_CROSSCOMPILE 0
+#define HASH_INSTALL 1
+#define HASH_FTRACE 2
+#define HASH_LOSETUP 3
+
 static int options;
 const char* sopts = "f:h";
 static struct option lopts[] = {
@@ -29,65 +35,72 @@ static struct option lopts[] = {
     {NULL, 0, 0, 0}
 };
 
-void run(char *optarg)
+typedef struct {
+	char *key;
+	int value;
+} ftable;
+static ftable functionKeys[] = {
+	{"crosscompile", HASH_CROSSCOMPILE},
+	{"cc", HASH_CROSSCOMPILE},
+	{"install", HASH_INSTALL},
+	{"ftrace", HASH_FTRACE},
+	{"losetup", HASH_LOSETUP}
+};
+
+#define NKEYS (sizeof(functionKeys)/sizeof(ftable))
+
+int fkey(char *key)
 {
 	int ret;
 
-	if ((!strcmp(optarg, "crosscompile")) || (!strcmp(optarg, "cc"))) {
-		ret = system("/usr/bin/bash -c do_crosscompile");
-
-		if (ret < 0) {
-			printf("system function error!\n");
-		}
-
-		else if (ret == 127) {
-			printf("fork and execve error!\n");
-		}
-
+	for (int i = 0; i < NKEYS; i++) {
+		ftable *tmp = &functionKeys[i];
+		if (strcmp(tmp->key, key) == 0)
+			return tmp->value;
 	}
 
-	else if (!strcmp(optarg, "ftrace")) {
-		ret = system("/usr/bin/bash -c do_ftrace");
+	return HASH_ERROR;
+}
 
-		if (ret < 0) {
-			printf("system function error!\n");
-		}
+int functions(int hash) {
+	int ret;
 
-		else if (ret == 127) {
-			printf("fork and execve error!\n");
-		}
-
+	switch (hash) {
+		case HASH_CROSSCOMPILE:
+			ret = system("/usr/bin/bash -c do_crosscompile");
+			if (ret != 0) {
+				fprintf(stderr, "system function error!\n");
+				return ret;
+			}
+			break;
+		case HASH_INSTALL:
+			ret = system("/usr/bin/bash -c do_nativeinstall");
+			if (ret != 0) {
+				fprintf(stderr, "system function error!\n");
+				return ret;
+			}
+			break;
+		case HASH_FTRACE:
+			ret = system("/usr/bin/bash -c do_ftrace");
+			if (ret != 0) {
+				fprintf(stderr, "system function error!\n");
+				return ret;
+			}
+			break;
+		case HASH_LOSETUP:
+			ret = system("/usr/bin/bash -c do_losetup");
+			if (ret != 0) {
+				fprintf(stderr, "system function error!\n");
+				return ret;
+			}
+			break;
+		case HASH_ERROR:
+				fprintf(stderr, "Invalid option! refert to '--help'\n");
+				ret = -1;
+			break;
 	}
 
-	else if (!strcmp(optarg, "install")) {
-		ret = system("/usr/bin/bash -c do_nativeinstall");
-
-		if (ret < 0) {
-			printf("system function error!\n");
-		}
-
-		else if (ret == 127) {
-			printf("fork and execve error!\n");
-		}
-
-	}
-
-	else if (!strcmp(optarg, "losetup")) {
-		ret = system("/usr/bin/bash -c do_losetup");
-
-		if (ret < 0) {
-			printf("system function error!\n");
-		}
-
-		else if (ret == 127) {
-			printf("fork and execve error!\n");
-		}
-
-	}
-
-	else {
-		printf("Invalid function\n");
-	}
+	return ret;
 }
 
 void Usage()
@@ -133,7 +146,7 @@ int main(int argc, char *argv[])
 	while ((options =  getopt_long(argc, argv, sopts, lopts, NULL)) != -1) {
 		switch (options) {
 			case 'f':
-				run(optarg);
+				functions(fkey(optarg));
 				break;
 			case 'h':
 				Usage();
