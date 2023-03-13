@@ -70,29 +70,25 @@ int functions(int hash) {
 
 	switch (hash) {
 		case HASH_CROSSCOMPILE:
-			ret = system("/usr/bin/bash -c do_crosscompile");
-			if (ret != 0) {
+			if ((ret = system("/usr/bin/bash -c do_crosscompile"))) {
 				fprintf(stderr, "system function error!\n");
 				return ret;
 			}
 			break;
 		case HASH_INSTALL:
-			ret = system("/usr/bin/bash -c do_nativeinstall");
-			if (ret != 0) {
+			if ((ret = system("/usr/bin/bash -c do_nativeinstall"))) {
 				fprintf(stderr, "system function error!\n");
 				return ret;
 			}
 			break;
 		case HASH_FTRACE:
-			ret = system("/usr/bin/bash -c do_ftrace");
-			if (ret != 0) {
+			if ((ret = system("/usr/bin/bash -c do_ftrace"))) {
 				fprintf(stderr, "system function error!\n");
 				return ret;
 			}
 			break;
 		case HASH_LOSETUP:
-			ret = system("/usr/bin/bash -c do_losetup");
-			if (ret != 0) {
+			if ((ret = system("/usr/bin/bash -c do_losetup"))) {
 				fprintf(stderr, "system function error!\n");
 				return ret;
 			}
