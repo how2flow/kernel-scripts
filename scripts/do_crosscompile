@@ -2,12 +2,20 @@
 
 # for build various linux kernel (cross-compile).
 # this script has to move in kernel's top path.
-# written by Steve Jeong.
+# written by Steve Jeong (how2soft@gmail.com).
+
+set -e
 
 # path
 TOP_PATH="$(pwd -P)"
 OUT_PATH=${TOP_PATH}/out
 LOG_PATH=${TOP_PATH}/build_log.txt
+
+request() {
+  echo ""
+  echo "[kernel $1]"
+  read -r -p "Input $1: " $1
+}
 
 # options
 for opt in $@; do
@@ -21,11 +29,14 @@ for opt in $@; do
   esac
 done
 
-echo ""
-echo "[kernel architecture]"
-read -r -p "Input architecture: " arch
+request "architecture"
+request "config"
+request "targets"
+if [ ${targets} == "all" ]; then
+  targets=""
+fi
 
-case ${arch} in
+case ${architecture} in
   arm)
   export ARCH="arm"
   export CROSS_COMPILE="arm-linux-gnueabi-"
@@ -39,19 +50,6 @@ case ${arch} in
   export CROSS_COMPILE="aarch64-linux-gnu-"
   ;;
 esac
-
-echo ""
-echo "[kernel config]"
-read -r -p "Input kernel defconfig: " config
-echo "config=${config}"
-
-echo ""
-echo "[kernel build]"
-echo "target: zImage, modules, dtbs, all ..."
-read -r -p "Input build target: " targets
-if [ ${targets} == "all" ]; then
-  targets=""
-fi
 
 # make
 sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' arch/${ARCH}/configs/${config}

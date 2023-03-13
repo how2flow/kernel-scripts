@@ -2,10 +2,12 @@
 
 # image file -> block device
 # for mount linux kernel image file.
-# written by Steve Jeong.
+# written by Steve Jeong (how2soft@gmail.com).
 
+set -e
+
+TOP_PATH="$(pwd -P)"
 BLOCK="$(sudo losetup -f)"
-TOP_PATH="$( cd "$(dirname $0)" ; pwd -P)"
 
 [ ! -d tmp ] && mkdir -p tmp
 read -r -p "Target Image file:" img

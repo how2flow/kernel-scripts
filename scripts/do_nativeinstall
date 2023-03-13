@@ -2,15 +2,17 @@
 
 # for install linux kernel (native).
 # this script has to move in kernel's top path.
-# written by Steve Jeong.
+# written by Steve Jeong (how2soft@gmail.com).
+
+set -e
 
 # path
 TOP_PATH="$(pwd -P)"
 OUT_PATH=${TOP_PATH}/out
 
 echo "set architecture"
-ARCH=$(dpkg --print-architecture)
-case ${ARCH} in
+architecture=$(dpkg --print-architecture)
+case ${architecture} in
   arm|armhf)
   ARCH=arm
   ;;
@@ -18,8 +20,6 @@ case ${ARCH} in
   ARCH=arm64
   ;;
 esac
-
-KERNEL=vmlinuz-$(cat ${OUT_PATH}/include/config/kernel.release)
 
 echo "[kernel install]"
 cd ${OUT_PATH}
