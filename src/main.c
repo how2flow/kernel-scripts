@@ -100,7 +100,10 @@ void Usage()
 	printf("-f, --function: select and run kernel util function.\n");
 	printf("\n");
 	printf("                crosscompile|cc: used when kernel build target and build environment are different.\n");
-	printf("                              before using it, move to the root path of the kernel source.\n");
+	printf("                              before using it, move to the root path of the kernel source.\n\n");
+	printf("                              Input architecture: x86|arm|arm64 ...\n");
+	printf("                              Input config: defconfig|bcm2835_defconfig|odroidg12_defconfig ...\n");
+	printf("                              Input targets: zImage|modules|dtbs|all ...\n");
 	printf("\n");
 	printf("                ftrace: during the interaction, you must write the exact name of the function\n");
 	printf("                        you want to track within the kernel source. An untraceable function exists.\n");
