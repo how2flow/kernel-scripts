@@ -1,3 +1,3 @@
-bin_PROGRAMS = kernel
+bin_PROGRAMS = kernelsc
 
-kernel_SOURCES = main.c
+kernelsc_SOURCES = main.c

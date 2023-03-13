@@ -40,11 +40,14 @@ typedef struct {
 	int value;
 } ftable;
 static ftable functionKeys[] = {
-	{"crosscompile", HASH_CROSSCOMPILE},
-	{"cc", HASH_CROSSCOMPILE},
-	{"install", HASH_INSTALL},
-	{"ftrace", HASH_FTRACE},
-	{"losetup", HASH_LOSETUP}
+	// cross-compile
+	{"crosscompile", HASH_CROSSCOMPILE}, {"cc", HASH_CROSSCOMPILE},
+	// native-install
+	{"install", HASH_INSTALL}, {"inst", HASH_INSTALL},
+	// native-install
+	{"ftrace", HASH_FTRACE}, {"ft", HASH_FTRACE},
+	// losetup
+	{"losetup", HASH_LOSETUP}, {"lo", HASH_LOSETUP}
 };
 
 #define NKEYS (sizeof(functionKeys)/sizeof(ftable))
@@ -105,7 +108,7 @@ int functions(int hash) {
 
 void Usage()
 {
-	printf("Usage: kernel [OPTION] ...\n");
+	printf("Usage: kernelsc [OPTION] ...\n");
 	printf("Utils for kernel\n");
 	printf("(kernel install, kernel debuging, kernel management etc ...)\n");
 	printf("\n");
