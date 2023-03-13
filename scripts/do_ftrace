@@ -13,8 +13,6 @@
 # ...
 # written by Steve Jeong (how2soft@gmail.com).
 
-set -e
-
 PREFIX=/sys/kernel/debug/tracing
 # evnet path
 E_IRQ=${PREFIX}/events/irq
