@@ -1,3 +1,10 @@
+kernel-scripts (2.3.0) stable; urgency=medium
+
+  * do_crosscompile: Handling Exceptions.
+  * stamp as standard version.
+
+ -- Steve Jeong <how2soft@gmail.com>  Tue, 14 Mar 2023 09:52:51 +0900
+
 kernel-scripts (2.2.0-1) stable; urgency=medium
 
   * Release version 2.2.0 (git tag version).
