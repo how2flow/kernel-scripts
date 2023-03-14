@@ -17,7 +17,7 @@ request() {
   read -r -p "Input $1: " $1
 }
 
-# options
+# Options
 for opt in $@; do
   case ${opt} in
     --pre=*) # Add "-save-temps=objs" in KBUILD_CFLAGS of Makefile.
@@ -29,13 +29,8 @@ for opt in $@; do
   esac
 done
 
+# Configure
 request "architecture"
-request "config"
-request "target"
-if [ ${target} == "all" ]; then
-  target=""
-fi
-
 case ${architecture} in
   arm)
   export ARCH="arm"
@@ -49,11 +44,27 @@ case ${architecture} in
   export ARCH="arm64"
   export CROSS_COMPILE="aarch64-linux-gnu-"
   ;;
+  *)
+  echo "architecture: Invalid Option"
+  ;;
 esac
 
-# make
-sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' arch/${ARCH}/configs/${config}
-make O=${OUT_PATH} ${config}
-make ${PREPROCESS_FILE} O=${OUT_PATH} ${target} -j4 2>&1 | tee ${LOG_PATH}
+request "config"
+CONF_FILE=arch/${ARCH}/configs/${config}
+
+request "target"
+if [ ${target} == "all" ]; then
+  target=""
+fi
+
+# Build
+if [ ! -f ${CONF_FILE} ]; then
+  echo "Check existing config file or pwd: ROOT path of Linux kernel!"
+  exit 1
+else
+  sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' ${CONF_FILE}
+  make O=${OUT_PATH} ${config}
+  make ${PREPROCESS_FILE} O=${OUT_PATH} ${target} -j4 2>&1 | tee ${LOG_PATH}
+fi
 
 # vim: ft=sh ts=2 sw=2 sts=2 et
