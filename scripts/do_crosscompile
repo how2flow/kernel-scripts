@@ -62,7 +62,9 @@ if [ ! -f ${CONF_FILE} ]; then
   echo "Check existing config file or pwd: ROOT path of Linux kernel!"
   exit 1
 else
-  sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' ${CONF_FILE}
+  if [ -f ".scmversion" ]; then
+    sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' ${CONF_FILE}
+  fi
   make O=${OUT_PATH} ${config}
   make ${PREPROCESS_FILE} O=${OUT_PATH} ${target} -j4 2>&1 | tee ${LOG_PATH}
 fi
