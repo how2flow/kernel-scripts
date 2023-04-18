@@ -1,3 +1,9 @@
+kernel-scripts (2.3.2) stable; urgency=medium
+
+  * do_crosscompile: Add condition of LOCAL version config.
+
+ -- Steve Jeong <how2soft@gmail.com>  Tue, 18 Apr 2023 11:52:43 +0900
+
 kernel-scripts (2.3.1) stable; urgency=medium
 
   * Release version 2.3.1
