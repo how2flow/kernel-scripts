@@ -33,6 +33,10 @@ while true; do
       . "${PREFIX}"/do_losetup
       ;;
     --) shift
+      break
+      ;;
+    *)
+      echo "Not implemented: $1" >&2
       ;;
   esac
   shift
