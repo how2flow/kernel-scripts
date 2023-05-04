@@ -1,6 +1,4 @@
 #!/usr/bin/make -f
 
-DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
-
 %:
-	dh $@ --with autoreconf
+	dh $@

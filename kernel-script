@@ -1,0 +1,41 @@
+#!/bin/bash
+
+PREFIX="/usr/share/kernel-scripts"
+
+options=$(getopt -o cfil -l crosscompile,ftrace,install,losetup -- "$@")
+eval set -- "${options}"
+
+if [ "$1" == "--help" ]; then
+  echo "Usage: $0 [OPTIONS]"
+  echo "Options:"
+  echo "  -c, --crosscompile   Perform a cross-compilation of the kernel"
+  echo "  -f, --ftrace         Run ftrace with kernel APIs"
+  echo "                       need root permission"
+  echo "  -i, --install        Install the kernel to the system"
+  echo "  -l, --losetup        Losetup in loop devices"
+  echo "                       need root permission"
+  echo "  --help               Display this help message"
+  exit 0
+fi
+
+while true; do
+  case "$1" in
+    -c|--crosscompile)
+      . "${PREFIX}"/do_crosscompile
+      ;;
+    -f|--ftrace)
+      . "${PREFIX}"/do_ftrace
+      ;;
+    -i|--install)
+      . "${PREFIX}"/do_install
+      ;;
+    -l|--losetup)
+      . "${PREFIX}"/do_losetup
+      ;;
+    --) shift
+      ;;
+  esac
+  shift
+done
+
+# vim: set ft=sh ts=2 sw=2 sts=2 et

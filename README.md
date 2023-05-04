@@ -9,27 +9,31 @@ $ sudo apt install kernel-scripts
 ```
 
 ### Usage
-- cross-compile
+- kernel: cross-compile
 ```
-$ kernelsc -f crosscompile # or cc
-```
-
-- native install
-```
-$ kernelsc -f install # or inst
+$ kernel-scripts -c # or --crosscompile
 ```
 
-- ftrace
+- kernel: use ftrace
 ```
-$ kernelsc -f ftrace # or ft
+$ kernel-scripts -i # or --install
 ```
 
-- losetup
+- kernel: install
 ```
-$ kernelsc -f losetup # or lo
+$ kernel-scripts -f # or --ftrace
+```
+
+- kernel: losetup
+```
+$ kernel-scripts -l # or --losetup
 ```
 
 ### help
+
+```
+$ kernel-scripts --help
+```
 
 ### contact:
 e-mail: <how2soft@gmail.com>
