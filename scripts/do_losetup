@@ -9,6 +9,12 @@ set -e
 TOP_PATH="$(pwd -P)"
 BLOCK="$(sudo losetup -f)"
 
+# EUID
+if [[ ! -x "$(command -v sudo)" && $EUID -ne 0 ]]; then
+  echo "please run as 'root'"
+  exit 1
+fi
+
 [ ! -d tmp ] && mkdir -p tmp
 read -r -p "Target Image file:" img
 sudo losetup ${BLOCK} ${img} # delete: losetup -d ${BLOCK}

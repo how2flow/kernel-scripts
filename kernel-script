@@ -22,15 +22,19 @@ while true; do
   case "$1" in
     -c|--crosscompile)
       . "${PREFIX}"/do_crosscompile
+      exit 0
       ;;
     -f|--ftrace)
       . "${PREFIX}"/do_ftrace
+      exit 0
       ;;
     -i|--install)
       . "${PREFIX}"/do_install
+      exit 0
       ;;
     -l|--losetup)
       . "${PREFIX}"/do_losetup
+      exit 0
       ;;
     --) shift
       break

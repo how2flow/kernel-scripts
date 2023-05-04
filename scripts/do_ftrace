@@ -20,10 +20,10 @@ E_SCHD=${PREFIX}/events/sched
 E_SYS=${PREFIX}/evnets/syscalls
 
 # EUID
-#if [ $EUID -ne 0 ]; then
-#  echo "please run as 'root' or 'sudo'"
-#  exit
-#fi
+if [[ ! -x "$(command -v sudo)" && $EUID -ne 0 ]]; then
+  echo "please run as 'root'"
+  exit 1
+fi
 
 echo 0 | sudo tee "${PREFIX}/tracing_on"
 sleep 1
