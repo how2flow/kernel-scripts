@@ -2,11 +2,11 @@
 
 PREFIX="/usr/share/kernel-scripts"
 
-options=$(getopt -o cfil -l crosscompile,ftrace,install,losetup -- "$@")
+options=$(getopt -o cfhil -l crosscompile,ftrace,help,install,losetup -- "$@")
 eval set -- "${options}"
 
-if [ "$1" == "--help" ]; then
-  echo "Usage: $0 [OPTIONS]"
+Usage() {
+  echo "Usage: kernel-script [OPTIONS]"
   echo "Options:"
   echo "  -c, --crosscompile   Perform a cross-compilation of the kernel"
   echo "  -f, --ftrace         Run ftrace with kernel APIs"
@@ -16,7 +16,7 @@ if [ "$1" == "--help" ]; then
   echo "                       need root permission"
   echo "  --help               Display this help message"
   exit 0
-fi
+}
 
 while true; do
   case "$1" in
@@ -27,6 +27,9 @@ while true; do
     -f|--ftrace)
       . "${PREFIX}"/do_ftrace
       exit 0
+      ;;
+    -h|--help)
+      Usage
       ;;
     -i|--install)
       . "${PREFIX}"/do_install
