@@ -1,3 +1,9 @@
+kernel-scripts (2.4.3) stable; urgency=medium
+
+  * fix help error.
+
+ -- Steve Jeong <how2soft@gmail.com>  Tue, 30 May 2023 12:18:38 +0900
+
 kernel-scripts (2.4.2) stable; urgency=medium
 
   * Verifying permissions in minimal Ensuring compatibility
