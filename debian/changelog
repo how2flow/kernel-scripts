@@ -1,3 +1,9 @@
+kernel-scripts (2.4.4) stable; urgency=medium
+
+  * README: fix commands
+
+ -- Steve Jeong <how2soft@gmail.com>  Tue, 13 Jun 2023 10:53:54 +0900
+
 kernel-scripts (2.4.3) stable; urgency=medium
 
   * fix help error.
