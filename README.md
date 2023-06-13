@@ -11,22 +11,22 @@ $ sudo apt install kernel-scripts
 ### Usage
 - kernel: cross-compile
 ```
-$ kernel-scripts -c # or --crosscompile
+$ kernel-script -c # or --crosscompile
 ```
 
 - kernel: use ftrace
 ```
-$ kernel-scripts -i # or --install
+$ kernel-script -i # or --install
 ```
 
 - kernel: install
 ```
-$ kernel-scripts -f # or --ftrace
+$ kernel-script -f # or --ftrace
 ```
 
 - kernel: losetup
 ```
-$ kernel-scripts -l # or --losetup
+$ kernel-script -l # or --losetup
 ```
 
 ### help
