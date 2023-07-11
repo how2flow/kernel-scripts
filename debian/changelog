@@ -1,3 +1,9 @@
+kernel-scripts (2.4.5) stable; urgency=medium
+
+  * The maintainer's email address has been changed.
+
+ -- Steve Jeong <steve@how2flow.net>  Tue, 11 Jul 2023 15:57:41 +0900
+
 kernel-scripts (2.4.4) stable; urgency=medium
 
   * README: fix commands
