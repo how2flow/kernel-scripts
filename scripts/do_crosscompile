@@ -2,7 +2,7 @@
 
 # for build various linux kernel (cross-compile).
 # this script has to move in kernel's top path.
-# written by Steve Jeong (how2soft@gmail.com).
+# written by Steve Jeong (steve@how2flow.net).
 
 set -e
 

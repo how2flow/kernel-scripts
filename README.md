@@ -36,4 +36,4 @@ $ kernel-scripts --help
 ```
 
 ### contact:
-e-mail: <how2soft@gmail.com>
+e-mail: <steve@how2flow.net>

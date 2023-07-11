@@ -11,7 +11,7 @@
 # CONFIG_SCHED_TRACER=y
 # CONFIG_FUNCTION_PROFILER=y
 # ...
-# written by Steve Jeong (how2soft@gmail.com).
+# written by Steve Jeong (steve@how2flow.net).
 
 PREFIX=/sys/kernel/debug/tracing
 # evnet path

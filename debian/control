@@ -1,7 +1,7 @@
 Source: kernel-scripts
 Section: misc
 Priority: optional
-Maintainer: Steve Jeong <how2soft@gmail.com>
+Maintainer: Steve Jeong <steve@how2flow.net>
 Standards-Version: 2.4.1
 Build-Depends: debhelper (>= 10)
 
