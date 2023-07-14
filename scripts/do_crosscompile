@@ -11,9 +11,30 @@ TOP_PATH="$(pwd -P)"
 OUT_PATH=${TOP_PATH}/out
 LOG_PATH=${TOP_PATH}/build_log.txt
 
+help_msg() {
+  local msg=""
+
+  case $1 in
+    architecture)
+      msg="e.g 'arm64' or 'x86' or ..."
+      ;;
+    config)
+      msg="e.g 'i386_defconfig' or 'oldconfig' or ..."
+      ;;
+    target)
+      msg="e.g 'dtbs' or 'modules' or 'vmlinux' or ..."
+      ;;
+    *)
+      ;;
+  esac
+
+  echo ${msg}
+}
+
 request() {
   echo ""
   echo "[kernel build $1]"
+  help_msg $1
   read -r -p "Input $1: " $1
 }
 
