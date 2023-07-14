@@ -78,6 +78,18 @@ if [ ${target} == "all" ]; then
   target=""
 fi
 
+# set build path 'out' or root
+echo ""
+read -r -p "Would you want to separate the result files? [Y/n]: " FLAG_O
+case ${FLAG_O} in
+  [nN][oO]|[nN])
+    OUT_PATH=""
+    ;;
+  *)
+    OUT_PATH="${TOP_PATH}/out"
+    ;;
+esac
+
 # Build
 if [ ! -f ${CONF_FILE} ]; then
   echo "Check existing config file or pwd: ROOT path of Linux kernel!"
