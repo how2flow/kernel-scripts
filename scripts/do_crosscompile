@@ -92,14 +92,16 @@ esac
 
 # Build
 if [ ! -f ${CONF_FILE} ]; then
-  echo "Check existing config file or pwd: ROOT path of Linux kernel!"
-  exit 1
-else
-  if [ -f ".scmversion" ]; then
-    sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' ${CONF_FILE}
-  fi
-  make O=${OUT_PATH} ${config}
-  make ${PREPROCESS_FILE} O=${OUT_PATH} ${target} -j4 2>&1 | tee ${LOG_PATH}
+  [ ${config} != "oldconfig" ] && \
+    echo "Check existing config file or pwd: ROOT path of Linux kernel!" && exit 1
 fi
+
+if [ -f ".scmversion" ]; then
+  [ ${config} != "oldconfig" ] && \
+    sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' ${CONF_FILE}
+fi
+
+make O=${OUT_PATH} ${config}
+make ${PREPROCESS_FILE} O=${OUT_PATH} ${target} -j4 2>&1 | tee ${LOG_PATH}
 
 # vim: ft=sh ts=2 sw=2 sts=2 et
