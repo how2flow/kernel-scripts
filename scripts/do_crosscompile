@@ -102,6 +102,6 @@ if [ -f ".scmversion" ]; then
 fi
 
 make O=${OUT_PATH} ${config}
-make ${PREPROCESS_FILE} O=${OUT_PATH} ${target} -j4 2>&1 | tee ${LOG_PATH}
+make ${PREPROCESS_FILE} O=${OUT_PATH} ${target} -j$(nproc) 2>&1 | tee ${LOG_PATH}
 
 # vim: ft=sh ts=2 sw=2 sts=2 et
