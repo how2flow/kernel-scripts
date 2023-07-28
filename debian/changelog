@@ -1,3 +1,9 @@
+kernel-scripts (2.4.8) stable; urgency=medium
+
+  * Support Using just only script too.
+
+ -- Steve Jeong <steve@how2flow.net>  Fri, 28 Jul 2023 18:10:54 +0900
+
 kernel-scripts (2.4.7) stable; urgency=medium
 
   * Change the build speed to maximum.
