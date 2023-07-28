@@ -1,6 +1,7 @@
 #!/bin/bash
 
-PREFIX="/usr/share/kernel-scripts"
+DEFAULT="/usr/share/kernel-scripts"
+PREFIX=${CHECKOUT:-${DEFAULT}}
 
 options=$(getopt -o cfhil -l crosscompile,ftrace,help,install,losetup -- "$@")
 eval set -- "${options}"
