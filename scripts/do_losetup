@@ -15,10 +15,29 @@ if [[ ! -x "$(command -v sudo)" && $EUID -ne 0 ]]; then
   exit 1
 fi
 
-[ ! -d tmp ] && mkdir -p tmp
-read -r -p "Target Image file:" img
-sudo losetup ${BLOCK} ${img} # delete: losetup -d ${BLOCK}
-sudo partx -v --add ${BLOCK}
+echo ""
+read -r -p "Select option: losetup[s] or delete[d]? [s/d]: " option
+case ${option} in
+  [sS])
+    [ ! -d tmp ] && mkdir -p tmp
+    read -r -p "Target Image file:" img
+    sudo losetup ${BLOCK} ${img} # delete: losetup -d ${BLOCK}
+    sudo partx -v --add ${BLOCK}
+    OLD_BLOCK="${BLOCK}"
+    export LOSETUP=1
+    ;;
+  [dD])
+    if [ "${LOSETUP}" -eq 1 ]; then
+      sudo losetup -d ${OLD_BLOCK}
+      export LOSETUP=0
+    else
+      echo "There is no losetuped loop device"
+    fi
+    ;;
+  *)
+    echo "Invalid option"
+    ;;
+esac
 
 echo "..."
 echo "..."
