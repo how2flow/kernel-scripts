@@ -6,102 +6,85 @@
 
 set -e
 
-# path
-TOP_PATH="$(pwd -P)"
-OUT_PATH=${TOP_PATH}/out
-LOG_PATH=${TOP_PATH}/build_log.txt
+# declare
+declare -A CC
+CC["arm"]="arm-linux-gnueabi-"
+CC["armhf"]="arm-linux-gnueabihf-"
+CC["arm64"]="aarch64-linux-gnu-"
 
 help_msg() {
   local msg=""
 
-  case $1 in
-    architecture)
+  case "${1}" in
+    arch)
       msg="e.g 'arm64' or 'x86' or ..."
       ;;
     config)
       msg="e.g 'i386_defconfig' or 'oldconfig' or ..."
       ;;
-    target)
-      msg="e.g 'dtbs' or 'modules' or 'vmlinux' or ..."
-      ;;
     *)
       ;;
   esac
 
-  echo ${msg}
+  echo ""
+  echo "[kernel "${1}"]"
+  echo "${msg}"
 }
 
 request() {
-  echo ""
-  echo "[kernel build $1]"
-  help_msg $1
-  read -r -p "Input $1: " $1
+  local key=""
+  local tmp=""
+
+  while true
+  do
+    help_msg "${1}"
+    read -r -p "Input "${1}": " tmp
+
+    key=$(find $(pwd -P)/arch -name "${tmp/armhf/arm}" | wc -l)
+    [[ ${key} -gt 0 || "${tmp}" == "oldconfig" ]] && break
+
+    echo ""
+    echo "[W] Invalid "${1}" argument! There is no "${1}: ""${tmp}""
+  done
+
+  REQ="${tmp}"
 }
 
-# Options
-for opt in $@; do
-  case ${opt} in
-    --pre=*) # Add "-save-temps=objs" in KBUILD_CFLAGS of Makefile.
-    PREPROCESS_FILE=${opt#*=}
-    echo "preprocess file:${PREPROCESS_FILE}"
-    ;;
-    *)
-    ;;
-  esac
-done
+# check kernel root
+if [[ ! -d arch || ! -d init ]]; then
+  echo "Make sure you are currently in the path of the kernel root!"
+  exit 1
+fi
 
-# Configure
-request "architecture"
-case ${architecture} in
-  arm)
-  export ARCH="arm"
-  export CROSS_COMPILE="arm-linux-gnueabi-"
-  ;;
-  armhf)
-  export ARCH="arm"
-  export CROSS_COMPILE="arm-linux-gnueabihf-"
-  ;;
-  arm64)
-  export ARCH="arm64"
-  export CROSS_COMPILE="aarch64-linux-gnu-"
-  ;;
-  *)
-  echo "architecture: Invalid Option"
-  ;;
-esac
+# request
+request "arch"
+ARCH="${REQ/armhf/arm}" && CROSS_COMPILE="${CC[${REQ}]}"
 
 request "config"
-CONF_FILE=arch/${ARCH}/configs/${config}
+CONFIG=${REQ}
 
-request "target"
-if [ ${target} == "all" ]; then
-  target=""
-fi
-
-# set build path 'out' or root
+# set Target
 echo ""
-read -r -p "Would you want to separate the result files? [Y/n]: " FLAG_O
-case ${FLAG_O} in
-  [nN][oO]|[nN])
-    OUT_PATH=""
+read -r -p "What do you wan't build? (all/dtbs/modules)? [A/d/m]: " TARGET
+case ${TARGET} in
+  [dD][tT][bB][sS]|[dD])
+    TARGET="dtbs"
+    ;;
+  [mM][oO][dD][uU][lL][eE][sS]|[mM])
+    TARGET="modules"
     ;;
   *)
-    OUT_PATH="${TOP_PATH}/out"
+    TARGET="all"
     ;;
 esac
 
-# Build
-if [ ! -f ${CONF_FILE} ]; then
-  [ ${config} != "oldconfig" ] && \
-    echo "Check existing config file or pwd: ROOT path of Linux kernel!" && exit 1
+# kernel.release
+if [[ -f ".scmversion" && ${CONFIG} != "oldconfig" ]]; then
+  sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' arch/${ARCH}/configs/${CONFIG}
 fi
 
-if [ -f ".scmversion" ]; then
-  [ ${config} != "oldconfig" ] && \
-    sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' ${CONF_FILE}
-fi
-
-make O=${OUT_PATH} ${config}
-make ${PREPROCESS_FILE} O=${OUT_PATH} ${target} -j$(nproc) 2>&1 | tee ${LOG_PATH}
+# make
+make "${CONFIG}"
+make ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" "${TARGET}" -j$(nproc)
 
 # vim: ft=sh ts=2 sw=2 sts=2 et
