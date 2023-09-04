@@ -1,3 +1,9 @@
+kernel-scripts (2.5.0) stable; urgency=medium
+
+  * Code refactoring
+
+ -- Steve Jeong <steve@how2flow.net>  Mon, 04 Sep 2023 16:54:16 +0900
+
 kernel-scripts (2.4.9) stable; urgency=medium
 
   * Losetup: Run interactive
