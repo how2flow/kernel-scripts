@@ -1,3 +1,11 @@
+kernel-scripts (2.5.1) stable; urgency=medium
+
+  * do_crosscompile: Improve script
+                     Make config with architecture
+                     Print script cmd
+
+ -- Steve Jeong <steve@how2flow.net>  Tue, 28 Nov 2023 15:17:32 +0900
+
 kernel-scripts (2.5.0) stable; urgency=medium
 
   * Code refactoring
