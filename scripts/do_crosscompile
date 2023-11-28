@@ -12,6 +12,8 @@ CC["arm"]="arm-linux-gnueabi-"
 CC["armhf"]="arm-linux-gnueabihf-"
 CC["arm64"]="aarch64-linux-gnu-"
 
+REQ=""
+
 help_msg() {
   local msg=""
 
@@ -84,7 +86,9 @@ if [[ -f ".scmversion" && ${CONFIG} != "oldconfig" ]]; then
 fi
 
 # make
-make "${CONFIG}"
+echo "make ARCH=${ARCH} ${CONFIG}"
+make ARCH="${ARCH}" "${CONFIG}"
+echo "make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} ${TARGET} -j$(nproc)"
 make ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" "${TARGET}" -j$(nproc)
 
 # vim: ft=sh ts=2 sw=2 sts=2 et
