@@ -67,6 +67,7 @@ CONFIG=${REQ}
 
 # set Target
 echo ""
+echo "If it's your first build, you must do the build all.."
 read -r -p "What do you wan't build? (all/dtbs/modules)? [A/d/m]: " TARGET
 case ${TARGET} in
   [dD][tT][bB][sS]|[dD])
@@ -85,10 +86,14 @@ if [[ -f ".scmversion" && ${CONFIG} != "oldconfig" ]]; then
   sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' arch/${ARCH}/configs/${CONFIG}
 fi
 
+# export params
+export ARCH=${ARCH}
+export CROSS_COMPILE=${CROSS_COMPILE}
+
 # make
 echo "make ARCH=${ARCH} ${CONFIG}"
-make ARCH="${ARCH}" "${CONFIG}"
+make ${CONFIG}
 echo "make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} ${TARGET} -j$(nproc)"
-make ARCH="${ARCH}" CROSS_COMPILE="${CROSS_COMPILE}" "${TARGET}" -j$(nproc)
+make ${TARGET} -j$(nproc)
 
 # vim: ft=sh ts=2 sw=2 sts=2 et
