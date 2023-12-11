@@ -9,6 +9,19 @@ set -e
 TOP_PATH="$(pwd -P)"
 BLOCK="$(sudo losetup -f)"
 
+msg_losetup() {
+
+  echo "..."
+  echo "..."
+  echo "========================================="
+  echo "Complete losetup image file"
+  echo ""
+  echo "Usage:"
+  echo ""
+  echo "    sudo mount \"${BLOCK}p#\" $(pwd)/tmp"
+  echo "========================================="
+}
+
 # EUID
 if [[ ! -x "$(command -v sudo)" && $EUID -ne 0 ]]; then
   echo "please run as 'root'"
@@ -23,12 +36,14 @@ case ${option} in
     read -r -p "Target Image file:" img
     sudo losetup ${BLOCK} ${img} # delete: losetup -d ${BLOCK}
     sudo partx -v --add ${BLOCK}
-    OLD_BLOCK="${BLOCK}"
+    export OLD_BLOCK="${BLOCK}"
     export LOSETUP=1
+    msg_losetup
     ;;
   [dD])
     if [ "${LOSETUP}" -eq 1 ]; then
       sudo losetup -d ${OLD_BLOCK}
+      export OLD_BLOCK=""
       export LOSETUP=0
     else
       echo "There is no losetuped loop device"
@@ -38,15 +53,5 @@ case ${option} in
     echo "Invalid option"
     ;;
 esac
-
-echo "..."
-echo "..."
-echo "===================================="
-echo "Complete losetup image file"
-echo ""
-echo "Usage:"
-echo ""
-echo "    mount \"${BLOCK}p#\" $(pwd)/tmp"
-echo "===================================="
 
 # vim: ft=sh ts=2 sw=2 sts=2 et
