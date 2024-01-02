@@ -12,12 +12,10 @@ CC["arm"]="arm-linux-gnueabi-"
 CC["armhf"]="arm-linux-gnueabihf-"
 CC["arm64"]="aarch64-linux-gnu-"
 
-REQ=""
-
 help_msg() {
   local msg=""
 
-  case "${1}" in
+  case ${1} in
     arch)
       msg="e.g 'arm64' or 'x86' or ..."
       ;;
@@ -33,67 +31,94 @@ help_msg() {
   echo "${msg}"
 }
 
-request() {
-  local key=""
-  local tmp=""
-
-  while true
-  do
-    help_msg "${1}"
-    read -r -p "Input "${1}": " tmp
-
-    key=$(find $(pwd -P)/arch -name "${tmp/armhf/arm}" | wc -l)
-    [[ ${key} -gt 0 || "${tmp}" == "oldconfig" ]] && break
-
-    echo ""
-    echo "[W] Invalid "${1}" argument! There is no "${1}: ""${tmp}""
-  done
-
-  REQ="${tmp}"
+check_kernel_root() {
+  if [[ ! -d arch || ! -d init ]]; then
+    echo "Make sure you are currently in the path of the kernel root!"
+    exit 1
+  fi
 }
 
-# check kernel root
-if [[ ! -d arch || ! -d init ]]; then
-  echo "Make sure you are currently in the path of the kernel root!"
-  exit 1
-fi
+request() {
+  local key=""
+  local param=""
 
-# request
-request "arch"
-ARCH="${REQ/armhf/arm}" && CROSS_COMPILE="${CC[${REQ}]}"
+  while true; do
+    read -r -p "Input "${1}": " param
 
-request "config"
-CONFIG=${REQ}
+    key=$(find $(pwd -P)/arch -name "${param/armhf/arm}" | wc -l)
+    [[ ${key} -gt 0 || "${param}" == "oldconfig" ]] && break
 
-# set Target
-echo ""
-echo "If it's your first build, you must do the build all.."
-read -r -p "What do you wan't build? (all/dtbs/modules)? [A/d/m]: " TARGET
-case ${TARGET} in
-  [dD][tT][bB][sS]|[dD])
-    TARGET="dtbs"
-    ;;
-  [mM][oO][dD][uU][lL][eE][sS]|[mM])
-    TARGET="modules"
-    ;;
-  *)
-    TARGET="all"
-    ;;
-esac
+    echo ""
+    echo "[W] Invalid "${1}" argument! There is no "${1}: ""${param}""
+  done
 
-# kernel.release
-if [[ -f ".scmversion" && ${CONFIG} != "oldconfig" ]]; then
-  sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' arch/${ARCH}/configs/${CONFIG}
-fi
+  echo ${param}
+}
 
-# export params
-export ARCH=${ARCH}
-export CROSS_COMPILE=${CROSS_COMPILE}
+set_kernel_release() {
+  local arch=${1}
+  local config=${2}
 
-# make
-echo "make ARCH=${ARCH} ${CONFIG}"
-make ${CONFIG}
-echo "make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} ${TARGET} -j$(nproc)"
-make ${TARGET} -j$(nproc)
+  if [[ -f ".scmversion" && ${config} != "oldconfig" ]]; then
+    sed -i 's/.*CONFIG_LOCALVERSION_AUTO.*/CONFIG_LOCALVERSION_AUTO=y/g' arch/${arch}/configs/${config}
+  fi
+}
+
+set_target() {
+  local option=""
+  local ret=""
+
+  echo ""
+  echo "If it's your first build, you must do the build all.."
+  read -r -p "What do you wan't build? (all/dtbs/modules)? [A/d/m]: " option
+  case ${option} in
+    [dD][tT][bB][sS]|[dD])
+      ret="dtbs"
+      ;;
+    [mM][oO][dD][uU][lL][eE][sS]|[mM])
+      ret="modules"
+      ;;
+    *)
+      ret="all"
+      ;;
+  esac
+
+  echo ${ret}
+}
+
+main() {
+  local arch=""
+  local cc="" # cross-compiler
+  local config=""
+  local ret=""
+  local target=""
+
+  # Verify that the current working path is the root of the kernel source.
+  check_kernel_root
+
+  # config target's architecture
+  help_msg "arch"
+  ret=$(request "arch" | tail -n 1)
+  arch="${ret/armhf/arm}"
+  cc="${CC[${ret}]}"
+
+  # config target's configs
+  help_msg "config"
+  ret=$(request "config" | tail -n 1)
+  config=${ret}
+  set_kernel_release ${arch} ${config}
+
+  target=$(set_target | tail -n 1)
+  export ARCH=${arch}
+  export CROSS_COMPILE=${cc}
+
+  # build
+  echo "make ARCH=${arch} ${config}"
+  make ${config}
+  echo "make ARCH=${arch} CROSS_COMPILE=${cc} ${target} -j$(nproc)"
+  make ${target} -j$(nproc)
+}
+
+main
 
 # vim: ft=sh ts=2 sw=2 sts=2 et
