@@ -6,52 +6,107 @@
 
 set -e
 
-TOP_PATH="$(pwd -P)"
-BLOCK="$(sudo losetup -f)"
+delete_block() {
+  local workspace=()
 
-msg_losetup() {
+  # Check umount points
+  workspace=($(mount | grep loop*p | awk '{print $1}'))
+  # first, umount all
+  for i in ${workspace[@]}; do
+    umount ${i}
+  done
+  # then, delete loop devices
+  workspace=($(echo ${workspace[@]%p*} | tr " " "\n" | sort -u))
+  for i in ${workspace[@]}; do
+    if [ -e ${i} ]; then
+      losetup -d ${i}
+    fi
+  done
+}
 
-  echo "..."
-  echo "..."
-  echo "========================================="
-  echo "Complete losetup image file"
+setup_block() {
+  local block="$(losetup -f)"
+  local cnt=0
+  local idx=""
+  local img_lists=()
+  local mnt=""
+  local partitions=""
+  local workspace=""
+
+  # Check Target file exists or not and print all.
+  workspace="$(ls *.img > /dev/null 2>&1)"
+  if [ ! $? -eq 0 ]; then
+    echo "There is no target file."
+    exit 1
+  else
+    img_lists=($(ls *img))
+    echo ""
+    echo "=== The List of Target files ==="
+    for i in ${img_lists[@]}; do
+      echo [${cnt}] ${i}
+      cnt=$((cnt + 1))
+    done
+  fi
+  # Select Target file
+  while true; do
+    echo ""
+    read -r -p "Select Target file number: " idx
+    if [[ "${idx}" =~ ^[0-9]+$ ]]; then
+      if [ ${idx} -gt 0 ] && [ ${idx} -lt ${#img_lists[@]} ]; then
+        break
+      else
+        echo "Invalid Target number! Please enter a valid number"
+      fi
+    else
+      echo "Invalid input! Please enter a valid number."
+    fi
+  done
+
+  losetup ${block} ${img_lists[${idx}]}
+  partx -v --add ${block}
+  # Set mount point
   echo ""
-  echo "Usage:"
-  echo ""
-  echo "    sudo mount \"${BLOCK}p#\" $(pwd)/tmp"
-  echo "========================================="
+  read -r -p "Make mount point(default: tmp{n}): " mnt
+  if [ -z ${mnt} ]; then
+    mnt="tmp"
+  fi
+  if [ -d ${mnt} ]; then
+    echo "A '${mnt}' already exists."
+    mnt="${mnt}$(ls -d ${mnt}* | wc -l)"
+    echo "So kernel-script automatically created a mount point with the following name..."
+    echo "${mnt}"
+  fi
+  # Mount by partitions
+  partitions="$(ls ${block}p* | wc -l)"
+  for ((i=1; i<=${partitions}; i++)); do
+    mkdir -p ${mnt}/part${i}
+    mount ${block}p${i} ${mnt}/part${i}
+  done
+}
+
+main() {
+  local option=""
+
+  read -r -p "Select option: losetup[s] or delete[d]? [s/d]: " option
+  case ${option} in
+    [sS])
+      setup_block
+      ;;
+    [dD])
+      delete_block
+      ;;
+    *)
+      echo "Invalid option"
+      ;;
+  esac
 }
 
 # EUID
-if [[ ! -x "$(command -v sudo)" && $EUID -ne 0 ]]; then
+if [ $EUID -ne 0 ]; then
   echo "please run as 'root'"
-  exit 1
+  exit 0
 fi
 
-echo ""
-read -r -p "Select option: losetup[s] or delete[d]? [s/d]: " option
-case ${option} in
-  [sS])
-    [ ! -d tmp ] && mkdir -p tmp
-    read -r -p "Target Image file:" img
-    sudo losetup ${BLOCK} ${img} # delete: losetup -d ${BLOCK}
-    sudo partx -v --add ${BLOCK}
-    export OLD_BLOCK="${BLOCK}"
-    export LOSETUP=1
-    msg_losetup
-    ;;
-  [dD])
-    if [ "${LOSETUP}" -eq 1 ]; then
-      sudo losetup -d ${OLD_BLOCK}
-      export OLD_BLOCK=""
-      export LOSETUP=0
-    else
-      echo "There is no losetuped loop device"
-    fi
-    ;;
-  *)
-    echo "Invalid option"
-    ;;
-esac
+main
 
 # vim: ft=sh ts=2 sw=2 sts=2 et
