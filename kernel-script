@@ -12,7 +12,6 @@ Usage() {
   echo "  -c, --crosscompile   Perform a cross-compilation of the kernel"
   echo "  -f, --ftrace         Run ftrace with kernel APIs"
   echo "                       need root permission"
-  echo "  -i, --install        Install the kernel to the system"
   echo "  -l, --losetup        Losetup in loop devices"
   echo "                       need root permission"
   echo "  --help               Display this help message"
@@ -31,10 +30,6 @@ while true; do
       ;;
     -h|--help)
       Usage
-      ;;
-    -i|--install)
-      . "${PREFIX}"/do_install
-      exit 0
       ;;
     -l|--losetup)
       . "${PREFIX}"/do_losetup
