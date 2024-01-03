@@ -1,7 +1,9 @@
 # kernel-scripts
+
 - Automation kernel scripts package.
 
 ### install
+
 ```
 $ sudo add-apt-repository ppa:how2flow/ppa
 $ sudo apt update
@@ -9,24 +11,20 @@ $ sudo apt install kernel-scripts
 ```
 
 ### Usage
-- kernel: cross-compile
+
+- kernel: Build/cross-compile
 ```
-$ kernel-script -c # or --crosscompile
+$ kernel-script --crosscompile
 ```
 
-- kernel: use ftrace
+- kernel: Run ftrace
 ```
-$ kernel-script -i # or --install
-```
-
-- kernel: install
-```
-$ kernel-script -f # or --ftrace
+$ sudo kernel-script --ftrace
 ```
 
 - kernel: losetup
 ```
-$ kernel-script -l # or --losetup
+$ sudo kernel-script --losetup
 ```
 
 ### help
@@ -36,4 +34,5 @@ $ kernel-scripts --help
 ```
 
 ### contact:
+
 e-mail: <steve@how2flow.net>
