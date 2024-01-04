@@ -1,3 +1,9 @@
+kernel-scripts (2.6.5) stable; urgency=medium
+
+  * Update Standards Version
+
+ -- Steve Jeong <steve@how2flow.net>  Thu, 04 Jan 2024 05:29:40 +0000
+
 kernel-scripts (2.6.4) stable; urgency=medium
 
   * do_losetup: Fix the input value condition
