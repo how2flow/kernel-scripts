@@ -63,7 +63,7 @@ setup_block() {
     echo ""
     read -r -p "Select Target file number: " idx
     if [[ "${idx}" =~ ^[0-9]+$ ]]; then
-      if [ ${idx} -gt 0 ] && [ ${idx} -lt ${#img_lists[@]} ]; then
+      if [ ${idx} -ge 0 ] && [ ${idx} -lt ${#img_lists[@]} ]; then
         break
       else
         echo "Invalid Target number! Please enter a valid number"
