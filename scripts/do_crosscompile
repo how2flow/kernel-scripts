@@ -39,7 +39,7 @@ help_msg() {
   esac
 
   echo ""
-  echo "[kernel "${1}"]"
+  echo "[kernel ${1}]"
   echo "${msg}"
 }
 
@@ -55,13 +55,13 @@ request() {
   local param=""
 
   while true; do
-    read -r -p "Input "${1}": " param
+    read -r -p "Input ${1}: " param
 
     key=$(find $(pwd -P)/arch -name "${param/armhf/arm}" | wc -l)
-    [[ ${key} -gt 0 || "${param}" == "oldconfig" ]] && break
+    [[ ${key} -gt 0 || ${param} == "oldconfig" ]] && break
 
     echo ""
-    echo "[W] Invalid "${1}" argument! There is no "${1}: ""${param}""
+    echo "[W] Invalid ${1} argument! There is no ${1}: ${param}"
   done
 
   echo ${param}
@@ -111,8 +111,8 @@ main() {
   # config target's architecture
   help_msg "arch"
   ret=$(request "arch" | tail -n 1)
-  arch="${ret/armhf/arm}"
-  cc="${CC[${ret}]}"
+  arch=${ret/armhf/arm}
+  cc=${CC[${ret}]}
 
   # config target's configs
   help_msg "config"
