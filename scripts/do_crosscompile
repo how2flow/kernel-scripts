@@ -22,6 +22,7 @@ declare -A CC
 CC["arm"]="arm-linux-gnueabi-"
 CC["armhf"]="arm-linux-gnueabihf-"
 CC["arm64"]="aarch64-linux-gnu-"
+CC["x86"]="x86-64-linux-gnu-"
 
 help_msg() {
   local msg=""
