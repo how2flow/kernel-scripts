@@ -18,11 +18,11 @@
 set -e
 
 # declare
-declare -A CC
-CC["arm"]="arm-linux-gnueabi-"
-CC["armhf"]="arm-linux-gnueabihf-"
-CC["arm64"]="aarch64-linux-gnu-"
-CC["x86"]="x86-64-linux-gnu-"
+declare -A CCList
+CCList["arm"]="arm-linux-gnueabi-"
+CCList["armhf"]="arm-linux-gnueabihf-"
+CCList["arm64"]="aarch64-linux-gnu-"
+CCList["x86"]="x86-64-linux-gnu-"
 
 help_msg() {
   local msg=""
@@ -112,7 +112,7 @@ main() {
   help_msg "arch"
   ret=$(request "arch" | tail -n 1)
   arch=${ret/armhf/arm}
-  cc=${CC[${ret}]}
+  cc=${CCList[${ret}]}
 
   # config target's configs
   help_msg "config"
