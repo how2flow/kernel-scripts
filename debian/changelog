@@ -1,3 +1,10 @@
+kernel-scripts (2.6.7) stable; urgency=medium
+
+  * do_crosscompile: Update script
+  * Delete ""
+
+ -- Steve Jeong <steve@how2flow.net>  Thu, 04 Jan 2024 06:20:49 +0000
+
 kernel-scripts (2.6.6) stable; urgency=medium
 
   * do_crosscompile: Add cross-compiler (x86)
