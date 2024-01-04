@@ -1,3 +1,9 @@
+kernel-scripts (2.6.3) stable; urgency=medium
+
+  * Update Standards Version (--force updated)
+
+ -- Steve Jeong <steve@how2flow.net>  Thu, 04 Jan 2024 04:45:13 +0000
+
 kernel-scripts (2.6.2) stable; urgency=medium
 
   * Update Standards Version
