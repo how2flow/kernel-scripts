@@ -17,6 +17,8 @@
 
 set -e
 
+PARAM=${1}
+
 delete_block() {
   local workspace=()
 
@@ -36,45 +38,56 @@ delete_block() {
 }
 
 setup_block() {
-  local block="$(losetup -f)"
-  local cnt=0
+  local block=""
+  local cnt=""
   local idx=""
   local img_lists=()
+  local image=""
   local mnt=""
   local partitions=""
   local workspace=""
 
-  # Check Target file exists or not and print all.
-  workspace="$(ls *.img > /dev/null 2>&1)"
-  if [ ! $? -eq 0 ]; then
-    echo "There is no target file."
-    exit 1
-  else
-    img_lists=($(ls *img))
-    echo ""
-    echo "=== The List of Target files ==="
-    for i in ${img_lists[@]}; do
-      echo [${cnt}] ${i}
-      cnt=$((cnt + 1))
-    done
-  fi
-  # Select Target file
-  while true; do
-    echo ""
-    read -r -p "Select Target file number: " idx
-    if [[ "${idx}" =~ ^[0-9]+$ ]]; then
-      if [ ${idx} -ge 0 ] && [ ${idx} -lt ${#img_lists[@]} ]; then
-        break
-      else
-        echo "Invalid Target number! Please enter a valid number"
-      fi
-    else
-      echo "Invalid input! Please enter a valid number."
-    fi
-  done
+  if [ ${PARAM} = "with-option" ]; then
+    workspace=$(ls *.img > /dev/null 2>&1)
+    block=$(losetup -f)
 
-  losetup ${block} ${img_lists[${idx}]}
+    if [ ! $? -eq 0 ]; then
+      echo "There is no target file."
+      exit 1
+    else
+      img_lists=($(ls *img))
+      echo ""
+      echo "=== The List of Target files ==="
+      cnt=0
+      for i in ${img_lists[@]}; do
+        echo [${cnt}] ${i}
+        cnt=$((cnt + 1))
+      done
+    fi
+  
+    while true; do
+      echo ""
+      read -r -p "Select Target file number: " idx
+      if [[ "${idx}" =~ ^[0-9]+$ ]]; then
+        if [ ${idx} -ge 0 ] && [ ${idx} -lt ${#img_lists[@]} ]; then
+          break
+        else
+          echo "Invalid Target number! Please enter a valid number"
+        fi
+      else
+        echo "Invalid input! Please enter a valid number."
+      fi
+    done
+
+    image=${img_lists[${idx}]}
+  elif [ ${PARAM} = "with-menu" ]; then
+    block=__LOOP_DEVICE__
+    image=__IMAGE__
+  fi
+
+  losetup ${block} ${image}
   partx -v --add ${block}
+
   # Set mount point
   echo ""
   read -r -p "Make mount point(default: tmp{n}): " mnt
@@ -87,6 +100,7 @@ setup_block() {
     echo "So kernel-script automatically created a mount point with the following name..."
     echo "${mnt}"
   fi
+
   # Mount by partitions
   partitions="$(ls ${block}p* | wc -l)"
   for ((i=1; i<=${partitions}; i++)); do
@@ -98,12 +112,17 @@ setup_block() {
 main() {
   local option=""
 
-  read -r -p "Select option: losetup[s] or delete[d]? [s/d]: " option
+  if [ ${PARAM} = "with-option" ]; then
+    read -r -p "Select option: losetup[s] or delete[d]? [s/d]: " option
+  elif [ ${PARAM} = "with-menu" ]; then
+    option=__OPTION__
+  fi
+
   case ${option} in
-    [sS])
+    [sS]|setup)
       setup_block
       ;;
-    [dD])
+    [dD]|delete)
       delete_block
       ;;
     *)

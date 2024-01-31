@@ -1,2 +1,3 @@
-kernel-script    usr/sbin
-scripts/*   usr/share/kernel-scripts
+kernel-script           usr/sbin
+menu                    usr/share/kernel-scripts
+scripts/*               usr/share/kernel-scripts

@@ -17,6 +17,8 @@
 
 set -e
 
+PARAM=${1}
+
 # ftracing script.
 # kernel function call stack. run with root permission.
 # check kernel config...
@@ -31,70 +33,89 @@ set -e
 # written by Steve Jeong (steve@how2flow.net).
 
 PREFIX=/sys/kernel/debug/tracing
-# evnet path
-E_IRQ=${PREFIX}/events/irq
-E_SCHD=${PREFIX}/events/sched
-E_SYS=${PREFIX}/events/syscalls
 
-# EUID
-if [ $EUID -ne 0 ]; then
-  echo "please run as 'root'"
-  exit 1
-fi
+prepare_events() {
+  local e_irq=${PREFIX}/events/irq
 
-echo 0 | tee "${PREFIX}/tracing_on"
-sleep 1
-echo "tracing off"
+  echo 1 | tee "${e_irq}/irq_handler_entry/enable"
+  echo 1 | tee "${e_irq}/irq_handler_exit/enable"
+  echo "event enable"
+  
+  echo 1 | tee "${PREFIX}/options/func_stack_trace"
+  echo 1 | tee "${PREFIX}/options/sym-offset"
+  echo "function stack trace enabled"
+}
 
-echo 0 | tee "${PREFIX}/events/enable"
-sleep 1
-echo "events off"
+prepare_tracing() {
+  echo 0 | tee "${PREFIX}/tracing_on"
+  sleep 1
+  echo "tracing off"
+  
+  echo 0 | tee "${PREFIX}/events/enable"
+  sleep 1
+  echo "events off"
+  
+  echo "function" | tee "${PREFIX}/current_tracer"
+  sleep 1
+  echo "function tracer enabled"
+}
 
-echo "function" | tee "${PREFIX}/current_tracer"
-sleep 1
-echo "function tracer enabled"
+main() {
+  local cmd=""
+  local filter=""
 
-echo ""
-# filter check: $ cat /sys/kernel/debug/tracing/available_filter_functions
-read -r -p "Enter the kernel function name to filter(e.g. hrtimer_interrupt): " filter
-echo ${filter} | tee "${PREFIX}/set_ftrace_filter"
-if [ ! "$?" == 0 ]; then # TODO: Handle exceptions more reliably.
-  echo "Invalid Function Filter.."
-  exit 1
-fi
-sleep 1
-echo "set_ftrace_filter enabled"
+  # EUID
+  if [ $EUID -ne 0 ]; then
+    echo "please run as 'root'"
+    exit 1
+  fi
 
-# events
-echo 1 | tee "${E_IRQ}/irq_handler_entry/enable"
-echo 1 | tee "${E_IRQ}/irq_handler_exit/enable"
-echo "event enable"
+  prepare_tracing
 
-echo 1 | tee "${PREFIX}/options/func_stack_trace"
-echo 1 | tee "${PREFIX}/options/sym-offset"
-echo "function stack trace enabled"
+  if [ ${PARAM} = "with-option" ]; then
+    echo ""
+    # filter check: $ cat /sys/kernel/debug/tracing/available_filter_functions
+    read -r -p "Enter the kernel function name to filter(e.g. hrtimer_interrupt): " filter
+    echo ${filter} | tee "${PREFIX}/set_ftrace_filter"
+    if [ ! "$?" == 0 ]; then # TODO: Handle exceptions more reliably.
+      echo "Invalid Function Filter.."
+      exit 1
+    fi
+    sleep 1
+    echo "set_ftrace_filter enabled"
+  elif [ ${PARAM} = "with-menu" ]; then
+    echo __FILTER_FUNC__ | tee "${PREFIX}/set_ftrace_filter"
+  fi
 
-echo ""
-read -r -p "input trigger cmd(e.g. ls): " cmd
-if [ ! "$?" == 0 ]; then
-  exit 1
-fi
-echo "tracing on" # switch echo message for tracing only cmd.
-echo 1 | tee "${PREFIX}/tracing_on"
+  prepare_events
 
-echo "---cmd start---"
-echo "set filter: ${filter}"
-echo "test command: ${cmd}"
-${cmd}
-echo "---cmd end---"
+  if [ ${PARAM} = "with-option" ]; then
+    echo ""
+    read -r -p "input trigger cmd(e.g. ls): " cmd
+    if [ ! "$?" == 0 ]; then
+      exit 1
+    fi
+  elif [ ${PARAM} = "with-menu" ]; then
+    cmd=__CMD__
+  fi
 
-echo 0 | tee "${PREFIX}/tracing_on"
-echo "tracing off"
-echo "tracing info..."
-sleep 3
+  echo 1 | tee "${PREFIX}/tracing_on"
+  echo "---cmd start---"
+  echo "set filter: ${filter}"
+  echo "test command: ${cmd}"
+  ${cmd}
+  echo "---cmd end---"
+  echo 0 | tee "${PREFIX}/tracing_on"
 
-cp "${PREFIX}/trace" .
-mv trace trace.log
-chmod +r trace.log
+  echo "tracing off"
+  echo "tracing info..."
+  sleep 3
+  
+  cp "${PREFIX}/trace" .
+  mv trace trace.log
+  chmod +r trace.log
+}
+
+main
 
 # vim: ft=sh ts=2 sw=2 sts=2 et

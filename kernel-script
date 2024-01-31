@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-DEFAULT="/usr/share/kernel-scripts"
-PREFIX=${CHECKOUT:-${DEFAULT}}
+PREFIX="/usr/share/kernel-scripts"
+FIXUPS=${PREFIX}/fixups
 
 options=$(getopt -o cfhil -l crosscompile,ftrace,help,install,losetup -- "$@")
 eval set -- "${options}"
@@ -33,31 +33,65 @@ Usage() {
   exit 0
 }
 
-while true; do
-  case "$1" in
-    -c|--crosscompile)
-      . "${PREFIX}"/do_crosscompile
-      exit 0
-      ;;
-    -f|--ftrace)
-      . "${PREFIX}"/do_ftrace
-      exit 0
-      ;;
-    -h|--help)
-      Usage
-      ;;
-    -l|--losetup)
-      . "${PREFIX}"/do_losetup
-      exit 0
-      ;;
-    --) shift
-      break
-      ;;
-    *)
-      echo "Not implemented: $1" >&2
-      ;;
-  esac
-  shift
-done
+Run_with_menu() {
+  local param=""
+
+  . ${PREFIX}/menu
+  menu_main
+  if [ ! -z ${TO_DO} ]; then
+    menu_config ${PREFIX} ${FIXUPS}
+  fi
+
+  param="with-menu"
+
+  while true; do
+    case ${TO_DO} in
+      do_crosscompile)
+        . ${FIXUPS}/do_crosscompile ${param}
+        break
+        ;;
+      do_ftrace)
+        . ${FIXUPS}/do_ftrace ${param}
+        break
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
+}
+
+main() {
+  local param=""
+
+  param="with-option"
+
+  while true; do
+    case ${1} in
+      -c|--crosscompile)
+        . ${FIXUPS}/do_crosscompile ${param}
+        break
+        ;;
+      -f|--ftrace)
+        . ${FIXUPS}/do_ftrace ${param}
+        break
+        ;;
+      -h|--help)
+        Usage
+        break
+        ;;
+      *)
+        Run_with_menu
+        break
+        ;;
+      --) shift
+        break
+        ;;
+    esac
+    shift
+  done
+}
+
+main ${1}
 
 # vim: set ft=sh ts=2 sw=2 sts=2 et

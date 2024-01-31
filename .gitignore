@@ -31,6 +31,8 @@ Makefile
 kernel-scripts
 kernelsc
 
+fixups*
+
 *.swp
 *.img
 *.xz
