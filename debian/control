@@ -8,5 +8,7 @@ Build-Depends: debhelper (>= 10)
 Package: kernel-scripts
 Architecture: any
 Multi-Arch: foreign
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends},
+  ${shlibs:Depends},
+  make
 Description: Automation kernel scripts.
