@@ -17,6 +17,8 @@
 
 set -e
 
+PARAM=${1}
+
 # declare
 declare -A CCList
 CCList["arm"]="arm-linux-gnueabi-"
@@ -99,36 +101,42 @@ set_target() {
 }
 
 main() {
-  local arch=""
-  local cc="" # cross-compiler
-  local config=""
-  local ret=""
+  local orig_arch=""
+  local orig_path=""
   local target=""
 
+  orig_path=$(pwd -P)
+
   # Verify that the current working path is the root of the kernel source.
+  cd __SELECTED_PATH__
   check_kernel_root
 
-  # config target's architecture
-  help_msg "arch"
-  ret=$(request "arch" | tail -n 1)
-  arch=${ret/armhf/arm}
-  cc=${CCList[${ret}]}
+  if [ ${PARAM} = "with-option" ]; then
+    help_msg "arch"
+    orig_arch=$(request "arch" | tail -n 1)
+    ARCH=${orig_arch/armhf/arm}
+    help_msg "config"
+    CONFIG=$(request "config" | tail -n 1)
+    TARGET=$(set_target | tail -n 1)
+  elif [ ${PARAM} = "with-menu" ]; then
+    orig_arch=__ARCH__
+    ARCH=${orig_arch/armhf/arm}
+    CONFIG=__CONFIG__
+    TARGET=__OPTION__
+  fi
 
-  # config target's configs
-  help_msg "config"
-  ret=$(request "config" | tail -n 1)
-  config=${ret}
-  set_kernel_release ${arch} ${config}
+  set_kernel_release ${ARCH} ${CONFIG}
 
-  target=$(set_target | tail -n 1)
-  export ARCH=${arch}
-  export CROSS_COMPILE=${cc}
+  export ARCH=${ARCH}
+  export CROSS_COMPILE=${CCList[${orig_arch}]}
 
   # build
-  echo "make ARCH=${arch} ${config}"
-  make ${config}
-  echo "make ARCH=${arch} CROSS_COMPILE=${cc} ${target} -j$(nproc)"
-  make ${target} -j$(nproc)
+  echo "make ARCH=${ARCH} ${CONFIG}"
+  make ${CONFIG}
+  echo "make ARCH=${ARCH} CROSS_COMPILE=${CCList[${orig_arch}]} ${TARGET} -j$(nproc)"
+  make ${TARGET} -j$(nproc)
+
+  cd ${orig_path}
 }
 
 main

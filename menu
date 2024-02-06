@@ -1,0 +1,148 @@
+#!/bin/bash
+
+set -e
+
+menu_config() {
+  local configs=()
+  local fixups=""
+  local src=""
+
+  src=${1}
+  fixups=${2}
+
+  # ready to fixups
+  mkdir -p ${fixups} 2>&1 > /dev/null
+  if [ ${EUID} -eq 0 ]; then
+    chmod -R 777 ${fixups}
+  fi
+  cat ${src}/${TO_DO} > ${fixups}/${TO_DO}
+
+  # Forwarding Vars
+  configs=($(ls ${fixups}))
+  for config in ${configs[@]}; do
+    sed -i \
+      -e "s,__ARCH__,${ARCH},g" \
+      -e "s,__CONFIG__,${CONFIG},g" \
+      -e "s,__OPTION__,${OPTION},g" \
+      -e "s,__SELECTED_PATH__,${SELECTED_PATH},g" \
+      "${fixups}/${config}"
+  done
+}
+
+menu_select_option() {
+  local option_list=()
+  local option_tags=()
+  local selection=""
+  local ret=""
+
+  ret=${1}
+  IFS=${2:-" "} read -r -a option_list <<< ${ret}; ret=${#option_list[@]}
+  option_tags=("1" "default")
+  for ((i = 2; i < $((ret + 2)); i++)); do
+    option_tags+=("${i}" "${option_list[$((i - 2))]}")
+  done
+
+  selection=$(dialog --title "Cross Compile" \
+    --menu "Compile targets" 15 70 10 \
+    ${option_tags[@]} \
+    2>&1 > /dev/tty)
+
+  ret=$?
+  if [ $ret = 0 ]; then
+    echo "${option_tags[$((selection * 2 - 1))]}"
+  else
+    echo "Invalid arguments"
+  fi
+}
+
+menu_select_path() {
+  local selection=""
+  local ret=""
+
+  selection=$(dialog --stdout --backtitle "set env: kernel" \
+    --title "Select kernel" --fselect ${SELECTED_PATH:-$(pwd -P)} 15 40)
+
+  ret=$?
+  if [ ${ret} = 0 ]; then
+      echo ${selection}
+  else
+    echo "Invalid arguments"
+  fi
+}
+
+menu_kernel_cross_compile() {
+  local selection=""
+  local ret=""
+
+  while true
+  do
+    selection=$(dialog --clear --backtitle "kernel-script: cross-compile" \
+      --title "Set compile options" \
+      --extra-button --extra-label "Done" \
+      --menu "Please config arguments" 15 70 10 \
+      1 "kernel (${SELECTED_PATH})" \
+      2 "architecture (${ARCH})" \
+      3 "config (${CONFIG})" \
+      4 "build target (${OPTION})" \
+      2>&1 > /dev/tty)
+
+    ret=$?
+    if [ ${ret} = 3 ]; then
+      clear
+      ARCH=${ARCH:-default}; ARCH=${ARCH/default/arm}
+      CONFIG=${CONFIG:-default}; CONFIG=${CONFIG/default/defconfig}
+      OPTION=${OPTION:-default}; OPTION=${OPTION/default/all}
+      ANS="Done"
+      break
+    elif [ ${ret} = 0 ]; then
+      case ${selection} in
+        1) SELECTED_PATH=$(menu_select_path | tail -n 1);;
+        2) ARCH=$(menu_select_option \
+          "$(find ${SELECTED_PATH}/arch/ -mindepth 1 -maxdepth 1 -type d -printf '%f ')" | tail -n 1);;
+        3) CONFIG=$(menu_select_option \
+          "$(find ${SELECTED_PATH}/arch/${ARCH}/configs/ -mindepth 1 -maxdepth 1 -type f -printf '%f ')" | tail -n 1);;
+        4) OPTION=$(menu_select_option "all modules dtbs" | tail -n 1);;
+      esac
+    else
+      ANS="Cancel"
+      break
+    fi
+  done
+}
+
+menu_main() {
+  local selection=""
+  local ret=""
+
+  if [ ! -x $(command -v dialog) ]; then
+    echo "There is no dialog; \"apt install dialog\""
+    exit 0
+  fi
+
+  while true
+  do
+    selection=$(dialog --clear --backtitle "kernel-script" \
+      --title "Select Mode" \
+      --menu "Please Select specific mode" 15 70 10 \
+      1 "cross-compile" \
+      2>&1 > /dev/tty)
+
+    ret=$?
+    if [ ${ret} = 0 ]; then # OK
+      case ${selection} in
+        1) # cross-compile
+          ANS="Yet"
+          menu_kernel_cross_compile
+          if [ ${ANS} = "Done" ]; then
+            TO_DO="do_crosscompile"
+            break
+          fi
+          ;;
+      esac
+    else
+      clear
+      echo "Canceled"
+      break
+    fi
+  done
+}
