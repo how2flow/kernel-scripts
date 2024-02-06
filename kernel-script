@@ -50,6 +50,10 @@ Run_with_menu() {
         . ${FIXUPS}/do_crosscompile ${param}
         break
         ;;
+      do_ftrace)
+        . ${FIXUPS}/do_ftrace ${param}
+        break
+        ;;
       *)
         break
         ;;
@@ -66,6 +70,10 @@ main() {
     case ${1} in
       -c|--crosscompile)
         . ${FIXUPS}/do_crosscompile ${param}
+        break
+        ;;
+      -f|--ftrace)
+        . ${FIXUPS}/do_ftrace ${param}
         break
         ;;
       -h|--help)

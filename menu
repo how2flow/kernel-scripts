@@ -22,11 +22,29 @@ menu_config() {
   for config in ${configs[@]}; do
     sed -i \
       -e "s,__ARCH__,${ARCH},g" \
+      -e "s,__CMD__,${CMD},g" \
       -e "s,__CONFIG__,${CONFIG},g" \
+      -e "s,__FILTER_FUNC__,${FILTER_FUNC},g" \
       -e "s,__OPTION__,${OPTION},g" \
       -e "s,__SELECTED_PATH__,${SELECTED_PATH},g" \
       "${fixups}/${config}"
   done
+}
+
+menu_input_text() {
+  local selection=""
+  local ret=""
+
+  selection=$(dialog --title "Input Text" \
+    --inputbox "input" 10 20 \
+    2>&1 > /dev/tty)
+
+  ret=$?
+  if [ ${ret} = 0 ];then
+    echo ${selection}
+  else
+    echo "Invalid arguments"
+  fi
 }
 
 menu_select_option() {
@@ -110,6 +128,50 @@ menu_kernel_cross_compile() {
   done
 }
 
+menu_kernel_ftrace() {
+  local selection=""
+  local ret=""
+  local prefix=""
+
+  prefix="/sys/kernel/debug/tracing"
+  while true
+  do
+    if [ ! -e ${prefix} ]; then
+      ret=$(dialog --title "INFO" \
+        --msgbox "There is not support ftrace." 10 40 \
+        2>&1 > /dev/tty)
+      ANS="Cancel"
+      break
+    fi
+
+    selection=$(dialog --clear --backtitle "kernel-script: ftrace" \
+      --title "Set frace options" \
+      --extra-button --extra-label "Done" \
+      --menu "Please config arguments" 15 70 10 \
+      1 "function filter(${FUNCTION_FILTER})" \
+      2 "command for tracing(${CMD})" \
+      2>&1 > /dev/tty)
+
+    ret=$?
+    if [ ${ret} = 3 ]; then
+      clear
+      FILTER_FUNC=${FILTER_FUNC:-default}; FILTER_FUNC=${FILTER_FUNC/default/show_regs}
+      CMD=${CMD:-default}; CMD=${CMD/default/ls}
+      ANS="Done"
+      break
+    elif [ ${ret} = 0 ]; then
+      case ${selection} in
+        1)FILTER_FUNC=\
+          $(menu_select_option "$(cat ${prefix}/available_filter_functions)" "\n" | tail -n 1);;
+        2)CMD=$(menu_input_text | tail -n 1);;
+      esac
+    else
+      ANS="Cancel"
+      break
+    fi
+  done
+}
+
 menu_main() {
   local selection=""
   local ret=""
@@ -121,11 +183,20 @@ menu_main() {
 
   while true
   do
-    selection=$(dialog --clear --backtitle "kernel-script" \
-      --title "Select Mode" \
-      --menu "Please Select specific mode" 15 70 10 \
-      1 "cross-compile" \
-      2>&1 > /dev/tty)
+    if [ ${EUID} -ne 0 ]; then
+      selection=$(dialog --clear --backtitle "kernel-script" \
+        --title "Select Mode" \
+        --menu "Please Select specific mode" 15 70 10 \
+        1 "cross-compile" \
+        2>&1 > /dev/tty)
+    else
+      selection=$(dialog --clear --backtitle "kernel-script" \
+        --title "Select Mode" \
+        --menu "Please Select specific mode" 15 70 10 \
+        1 "cross-compile" \
+        2 "ftrace" \
+        2>&1 > /dev/tty)
+    fi
 
     ret=$?
     if [ ${ret} = 0 ]; then # OK
@@ -135,6 +206,14 @@ menu_main() {
           menu_kernel_cross_compile
           if [ ${ANS} = "Done" ]; then
             TO_DO="do_crosscompile"
+            break
+          fi
+          ;;
+        2) # ftrace
+          ANS="Yet"
+          menu_kernel_ftrace
+          if [ ${ANS} = "Done" ]; then
+            TO_DO="do_ftrace"
             break
           fi
           ;;
