@@ -54,6 +54,10 @@ Run_with_menu() {
         . ${FIXUPS}/do_ftrace ${param}
         break
         ;;
+      do_losetup)
+        . ${FIXUPS}/do_losetup ${param}
+        break
+        ;;
       *)
         break
         ;;
@@ -78,6 +82,10 @@ main() {
         ;;
       -h|--help)
         Usage
+        break
+        ;;
+      -l|--losetup)
+        . ${FIXUPS}/do_losetup ${param}
         break
         ;;
       *)
