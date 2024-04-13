@@ -30,11 +30,131 @@ set -e
 # ...
 # written by Steve Jeong (steve@how2flow.net).
 
+DEFAULT=$(pwd -P)
 PREFIX=/sys/kernel/debug/tracing
-# evnet path
-E_IRQ=${PREFIX}/events/irq
-E_SCHD=${PREFIX}/events/sched
-E_SYS=${PREFIX}/events/syscalls
+
+query_events() {
+  local flag
+  local events
+
+  while true; do
+    cd ${PREFIX}/events
+    read -e -p "Enable some kernel events? ${PREFIX}/events/: " events
+    if [ -f ${PREFIX}/events/${events} ]; then
+      echo 1 > ${PREFIX}/events/${events}
+    elif [ -z ${events} ]; then
+      echo "Move on without setting the event."
+    else
+      echo "Invalid events ..."
+      continue
+    fi
+
+    read -r -p "Have you finished setting up the evnets ([Y]es/[n]o)? :" flag
+    case ${flag} in
+      [Nn][Oo]|[Nn])
+        echo ""
+        continue
+        ;;
+      *)
+        cd ${DEFAULT}
+        break
+        ;;
+    esac
+  done
+}
+
+query_functions() {
+  local flag
+  local function
+
+  while true; do
+    read -r -p "Add the kernel function filter (e.g. hrtimer_interrupt): " function
+    if [ -z ${function} ]; then
+      echo secondary_start_kernel > ${PREFIX}/set_ftrace_filter
+    else
+      if [ $(grep -c ${function} ${PREFIX}/available_filter_functions) -gt 0 ]; then
+        echo ${function} > ${PREFIX}/set_ftrace_filter
+      else
+        echo "Invalid Function Filter.."
+        echo ""
+        continue
+      fi
+    fi
+
+    read -r -p "Have you finished setting up the filter ([Y]es/[n]o)? :" flag
+    case ${flag} in
+      [Nn][Oo]|[Nn])
+        echo ""
+        continue
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
+}
+
+init_ftrace() {
+  local init
+
+  # Ftrace off
+  echo 0 > ${PREFIX}/tracing_on
+  echo "Tracing off ..."
+  sleep 1
+  echo 0 > ${PREFIX}/events/enable
+  echo "Disable events ..."
+  sleep 1
+
+  # Dummy
+  echo secondary_start_kernel > ${PREFIX}/set_ftrace_filter
+  sleep 1
+
+  # Default options
+  echo 1 > ${PREFIX}/options/func_stack_trace
+  echo 1 > ${PREFIX}/options/sym-offset
+  echo "Init defualt options ... OK"
+}
+
+get_ftrace() {
+  echo 0 > ${PREFIX}/tracing_on
+  echo "Trace off for get logs ..."
+  sleep 3
+  cp ${PREFIX}/trace ./trace.log
+  chmod +r ./trace.log
+}
+
+set_ftrace() {
+
+  # Set tracer
+  read -r -p "Init current_tracer (default: function) ? :" init
+  case ${init} in
+    nop|function|function_graph)
+      echo ${init} > ${PREFIX}/current_tracer
+      ;;
+    *)
+      echo function > ${PREFIX}/current_tracer
+      ;;
+  esac
+  echo "Set current_tracer ... OK"
+  echo ""
+
+  # Query things
+  echo "Set events"
+  query_events
+  echo ""
+  echo "Set function filter"
+  query_functions
+  echo ""
+
+  # Ftrace on
+  echo 1 > ${PREFIX}/events/enable
+  echo "Enable events ..."
+  sleep 1
+  echo 1 > ${PREFIX}/tracing_on
+  echo "Trace on ..."
+  sleep 1
+
+}
 
 # EUID
 if [ $EUID -ne 0 ]; then
@@ -42,59 +162,23 @@ if [ $EUID -ne 0 ]; then
   exit 1
 fi
 
-echo 0 | tee "${PREFIX}/tracing_on"
-sleep 1
-echo "tracing off"
-
-echo 0 | tee "${PREFIX}/events/enable"
-sleep 1
-echo "events off"
-
-echo "function" | tee "${PREFIX}/current_tracer"
-sleep 1
-echo "function tracer enabled"
-
+echo " === [Initialize Ftrace] ==="
+init_ftrace
 echo ""
-# filter check: $ cat /sys/kernel/debug/tracing/available_filter_functions
-read -r -p "Enter the kernel function name to filter(e.g. hrtimer_interrupt): " filter
-echo ${filter} | tee "${PREFIX}/set_ftrace_filter"
-if [ ! "$?" == 0 ]; then # TODO: Handle exceptions more reliably.
-  echo "Invalid Function Filter.."
-  exit 1
-fi
-sleep 1
-echo "set_ftrace_filter enabled"
 
-# events
-echo 1 | tee "${E_IRQ}/irq_handler_entry/enable"
-echo 1 | tee "${E_IRQ}/irq_handler_exit/enable"
-echo "event enable"
-
-echo 1 | tee "${PREFIX}/options/func_stack_trace"
-echo 1 | tee "${PREFIX}/options/sym-offset"
-echo "function stack trace enabled"
-
+read -r -p "How would you use ftrace ([G]et/[S]et) ?: " OPTION
 echo ""
-read -r -p "input trigger cmd(e.g. ls): " cmd
-if [ ! "$?" == 0 ]; then
-  exit 1
-fi
-echo "tracing on" # switch echo message for tracing only cmd.
-echo 1 | tee "${PREFIX}/tracing_on"
-
-echo "---cmd start---"
-echo "set filter: ${filter}"
-echo "test command: ${cmd}"
-${cmd}
-echo "---cmd end---"
-
-echo 0 | tee "${PREFIX}/tracing_on"
-echo "tracing off"
-echo "tracing info..."
-sleep 3
-
-cp "${PREFIX}/trace" .
-mv trace trace.log
-chmod +r trace.log
+case ${OPTION} in
+  [Ss][Ee][Tt]|[Ss])
+    echo "=== [Set Ftrace] ==="
+    set_ftrace
+    echo ""
+    ;;
+  *)
+    echo "=== [Get Ftrace] ==="
+    get_ftrace
+    echo ""
+    ;;
+esac
 
 # vim: ft=sh ts=2 sw=2 sts=2 et
