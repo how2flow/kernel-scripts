@@ -1,3 +1,9 @@
+kernel-scripts (2.6.10) stable; urgency=medium
+
+  * Update ftrace
+
+ --  Steve Jeong <steve@how2flow.net>  Sun, 14 Apr 2024 09:54:00 +0100
+
 kernel-scripts (2.6.9) stable; urgency=medium
 
   * Update Standards Version
