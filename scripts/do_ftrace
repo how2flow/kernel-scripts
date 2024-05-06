@@ -52,7 +52,7 @@ query_events() {
       continue
     fi
 
-    read -r -p "Have you finished setting up the evnets ([Y]es/[n]o)? :" flag
+    read -r -p "Have you finished setting up the evnets ([Y]es/[n]o)? : " flag
     case ${flag} in
       [Nn][Oo]|[Nn])
         echo ""
@@ -84,7 +84,7 @@ query_functions() {
       fi
     fi
 
-    read -r -p "Have you finished setting up the filter ([Y]es/[n]o)? :" flag
+    read -r -p "Have you finished setting up the filter ([Y]es/[n]o)? : " flag
     case ${flag} in
       [Nn][Oo]|[Nn])
         echo ""
@@ -100,38 +100,64 @@ query_functions() {
 init_ftrace() {
   local init
 
-  # Ftrace off
-  echo 0 > ${PREFIX}/tracing_on
-  echo "Tracing off ..."
-  sleep 1
-  echo 0 > ${PREFIX}/events/enable
-  echo "Disable events ..."
-  sleep 1
+  if [ ! -d ${PREFIX} ]; then
+    echo "Please add configs of ftrace"
+    echo ""
+    echo "CONFIG_FTRACE=y"
+    echo "CONFIG_DYNAMIC_FTRACE=y"
+    echo "CONFIG_FUNCTION_TRACER=y"
+    echo "CONFIG_FUNCTION_GRAPH_TRACER=y"
+    echo "CONFIG_IRQSOFF_TRACER=y"
+    echo "CONFIG_SCHED_TRACER=y"
+    echo "CONFIG_FUNCTION_PROFILER=y"
+    echo "CONFIG_STACK_TRACER=y"
+    echo "CONFIG_TRACER_SNAPSHOT=y"
+    exit 1
+  fi
 
-  echo ${DUMMY} > ${PREFIX}/set_ftrace_filter
-  sleep 1
-
-  # Default options
+  # Init default options
   echo 1 > ${PREFIX}/options/func_stack_trace
   echo 1 > ${PREFIX}/options/sym-offset
+  sleep .5
   echo "Init defualt options ... OK"
 }
 
 get_ftrace() {
+  echo 0 > ${PREFIX}/events/enable
+  echo "Disable events ..."
+  sleep 1
   echo 0 > ${PREFIX}/tracing_on
   echo "Trace off for get logs ..."
-  sleep 3
+  sleep 1
+
+  # get ftrace log
+  sleep 2
   cp ${PREFIX}/trace ./trace.log
   chmod +r ./trace.log
 }
 
 set_ftrace() {
+  local tracer
 
-  # Set tracer
-  read -r -p "Init current_tracer (default: function) ? :" init
+  # Set current tracer
+  read -r -p "Init current tracer [[N]op|[F]unction|[G]function_graph] (default: nop) ? : " init
   case ${init} in
+    [Nn][Oo][Pp]|[Nn])
+      tracer=nop
+      ;;
+    [Ff][Uu][Nn][Cc][Tt][Ii][Oo][Nn]|[Ff])
+      tracer=function
+      ;;
+    [Ff][Uu][Nn][Cc][Tt][Ii][Oo][Nn]_[Gg][Rr][Aa][Pp][Hh]|[Gg])
+      tracer=function_graph
+      ;;
+    *)
+      tracer=nop
+      ;;
+  esac
+  case ${tracer} in
     nop|function|function_graph)
-      echo ${init} > ${PREFIX}/current_tracer
+      echo ${tracer} > ${PREFIX}/current_tracer
       ;;
     *)
       echo function > ${PREFIX}/current_tracer
@@ -144,9 +170,11 @@ set_ftrace() {
   echo "Set events"
   query_events
   echo ""
-  echo "Set function filter"
-  query_functions
-  echo ""
+  if [ $(cat ${PREFIX}/current_tracer) != 'nop' ]; then
+    echo "Set function filter"
+    query_functions
+    echo ""
+  fi
 
   # Ftrace on
   echo 1 > ${PREFIX}/events/enable
@@ -155,7 +183,6 @@ set_ftrace() {
   echo 1 > ${PREFIX}/tracing_on
   echo "Trace on ..."
   sleep 1
-
 }
 
 # EUID
