@@ -27,10 +27,13 @@ set -e
 # CONFIG_IRQSOFF_TRACER=y
 # CONFIG_SCHED_TRACER=y
 # CONFIG_FUNCTION_PROFILER=y
+# CONFIG_STACK_TRACER=y
+# CONFIG_TRACER_SNAPSHOT=y
 # ...
 # written by Steve Jeong (steve@how2flow.net).
 
 DEFAULT=$(pwd -P)
+DUMMY=kernel_init
 PREFIX=/sys/kernel/debug/tracing
 
 query_events() {
@@ -70,7 +73,7 @@ query_functions() {
   while true; do
     read -r -p "Add the kernel function filter (e.g. hrtimer_interrupt): " function
     if [ -z ${function} ]; then
-      echo secondary_start_kernel > ${PREFIX}/set_ftrace_filter
+      echo ${DUMMY} > ${PREFIX}/set_ftrace_filter
     else
       if [ $(grep -c ${function} ${PREFIX}/available_filter_functions) -gt 0 ]; then
         echo ${function} > ${PREFIX}/set_ftrace_filter
@@ -105,8 +108,7 @@ init_ftrace() {
   echo "Disable events ..."
   sleep 1
 
-  # Dummy
-  echo secondary_start_kernel > ${PREFIX}/set_ftrace_filter
+  echo ${DUMMY} > ${PREFIX}/set_ftrace_filter
   sleep 1
 
   # Default options
