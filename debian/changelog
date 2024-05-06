@@ -1,3 +1,10 @@
+kernel-scripts (2.7.0) stable; urgency=medium
+
+  * Update dummy function and kernel config
+  * Update query style and trace off flow
+
+ -- Steve Jeong <steve@how2flow.net>  Mon, 06 May 2024 16:25:35 +0900
+
 kernel-scripts (2.6.10) stable; urgency=medium
 
   * Update ftrace
