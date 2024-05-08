@@ -37,7 +37,7 @@ DUMMY=kernel_init
 PREFIX=/sys/kernel/debug/tracing
 
 query_events() {
-  local flag
+  local ans
   local events
 
   while true; do
@@ -52,14 +52,15 @@ query_events() {
       continue
     fi
 
-    read -r -p "Have you finished setting up the evnets ([Y]es/[n]o)? : " flag
-    case ${flag} in
+    read -r -p "Have you finished setting up the evnets ([Y]es/[n]o)? : " ans
+    case ${ans} in
       [Nn][Oo]|[Nn])
         echo ""
         continue
         ;;
       *)
         cd ${DEFAULT}
+        echo "Set current_tracer ... OK"
         break
         ;;
     esac
@@ -67,30 +68,55 @@ query_events() {
 }
 
 query_functions() {
+  local ans
+  local filters
   local flag
-  local function
+  local functions
 
   while true; do
-    read -r -p "Add the kernel function filter (e.g. hrtimer_interrupt): " function
-    if [ -z ${function} ]; then
-      echo ${DUMMY} > ${PREFIX}/set_ftrace_filter
-    else
-      if [ $(grep -c ${function} ${PREFIX}/available_filter_functions) -gt 0 ]; then
-        echo ${function} > ${PREFIX}/set_ftrace_filter
+    read -r -p "Add the kernel function filter (e.g. hrtimer_interrupt): " functions
+    if [ -z "${functions}" ]; then
+      echo ""
+      echo "Function filters must be applied."
+      continue
+    fi
+
+    for f in ${functions}; do
+      echo ""
+      echo "Search function filter: ${f} ..."
+      if [[ ${f} =~ \* ]]; then
+        flag="-c"
       else
-        echo "Invalid Function Filter.."
+        flag="-c -Fx"
+      fi
+
+      if [ $(cat ${PREFIX}/available_filter_functions | cut -d " " -f 1 | grep ${flag} ${f}) -gt 0 ]; then
+        filters+="${f} "
+        echo "${f}: Add functions filter!"
+        echo ""
+      else
+        echo "${f}: Invalid Function Filter!"
         echo ""
         continue
       fi
+    done
+
+    echo "Set filters: ${filters}"
+    echo ${filters} > ${PREFIX}/set_ftrace_filter
+    if [[ -z ${filters} ]]; then
+      echo "The filter is not properly set ..."
+      echo "Set filters: ${DUMMY}"
+      echo ${DUMMY} > ${PREFIX}/set_ftrace_filter
     fi
 
-    read -r -p "Have you finished setting up the filter ([Y]es/[n]o)? : " flag
-    case ${flag} in
+    read -r -p "Have you finished setting up the filter ([Y]es/[n]o)? : " ans
+    case ${ans} in
       [Nn][Oo]|[Nn])
         echo ""
         continue
         ;;
       *)
+        echo "Setup filters ... OK"
         break
         ;;
     esac
@@ -123,17 +149,19 @@ init_ftrace() {
 }
 
 get_ftrace() {
+  echo "Finish filtering ... OK"
   echo 0 > ${PREFIX}/events/enable
-  echo "Disable events ..."
+  echo "Disable events ... OK"
   sleep 1
   echo 0 > ${PREFIX}/tracing_on
-  echo "Trace off for get logs ..."
+  echo "Trace off for get logs ... OK"
   sleep 1
 
   # get ftrace log
   sleep 2
   cp ${PREFIX}/trace ./trace.log
   chmod +r ./trace.log
+  echo ""
 }
 
 set_ftrace() {
@@ -164,14 +192,14 @@ set_ftrace() {
       ;;
   esac
   echo "Set current_tracer ... OK"
-  echo ""
 
   # Query things
-  echo "Set events"
+  echo ""
+  echo "=== [Set events] ==="
   query_events
   echo ""
   if [ $(cat ${PREFIX}/current_tracer) != 'nop' ]; then
-    echo "Set function filter"
+    echo "=== [Set function filter] ==="
     query_functions
     echo ""
   fi
@@ -179,9 +207,11 @@ set_ftrace() {
   # Ftrace on
   echo 1 > ${PREFIX}/events/enable
   echo "Enable events ..."
+  echo ""
   sleep 1
   echo 1 > ${PREFIX}/tracing_on
   echo "Trace on ..."
+  echo ""
   sleep 1
 }
 
