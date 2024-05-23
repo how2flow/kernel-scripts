@@ -47,24 +47,32 @@ check_kernel_root() {
   if [[ ! -d arch || ! -d init ]]; then
     echo "Make sure you are currently in the path of the kernel root!"
     exit 1
+  else
+    ROOT=$(pwd -P)
   fi
 }
 
 request() {
   local key=""
-  local param=""
+  local params=""
 
+  cd ${1}
   while true; do
-    read -r -p "Input ${1}: " param
+    read -e -p "Input ${1}: " params
+    for param in ${params}; do
+      key=$(find ${ROOT}/${1} -name "${param/armhf/arm}" | wc -l)
+      if [[ ${key} -gt 0 || "x${param}" = "xoldconfig" ]]; then
+        continue
+      fi
+      key="invalid"
+    done
 
-    key=$(find $(pwd -P)/arch -name "${param/armhf/arm}" | wc -l)
-    [[ ${key} -gt 0 || ${param} == "oldconfig" ]] && break
-
-    echo ""
-    echo "[W] Invalid ${1} argument! There is no ${1}: ${param}"
+    [ "x${key}" != "xinvalid" ] && break
   done
 
-  echo ${param}
+  cd ${ROOT}
+
+  echo ${params}
 }
 
 set_kernel_release() {
@@ -116,7 +124,7 @@ main() {
 
   # config target's configs
   help_msg "config"
-  ret=$(request "config" | tail -n 1)
+  ret=$(request "arch/${arch}/configs" | tail -n 1)
   config=${ret}
   set_kernel_release ${arch} ${config}
 
