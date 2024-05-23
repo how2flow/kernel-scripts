@@ -2,7 +2,7 @@ Source: kernel-scripts
 Section: misc
 Priority: optional
 Maintainer: Steve Jeong <steve@how2flow.net>
-Standards-Version: 2.7.0
+Standards-Version: 2.7.2
 Build-Depends: debhelper (>= 10)
 
 Package: kernel-scripts
