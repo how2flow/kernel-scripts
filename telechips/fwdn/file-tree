@@ -1,0 +1,12 @@
+└── Window (C:)
+    ├── samba (Z:)
+        ├── boot-firmware/
+                        ├── fwnd.json
+                        ├── boot.json
+                        ├── SD_Data.fai
+                        ├── SD_Data.gpt
+                        ├── SD_Data.gpt.back
+                        ├── SD_Data.gpt.prim
+                        ├── ...
+                        ├── tools/
+                        ├── ...
