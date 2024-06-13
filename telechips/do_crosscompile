@@ -1,0 +1,139 @@
+#!/bin/bash
+
+# Copyright (C) 2024 Steve Jeong <steve@how2flow.net>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>
+
+set -e
+
+# declare
+declare -A CCList
+CCList["arm"]="arm-linux-gnueabi-"
+CCList["armhf"]="arm-linux-gnueabihf-"
+CCList["arm64"]="aarch64-linux-gnu-"
+CCList["x86"]="x86-64-linux-gnu-"
+
+help_msg() {
+  local msg=""
+
+  case ${1} in
+    arch)
+      msg="e.g 'arm64' or 'x86' or ..."
+      ;;
+    config)
+      msg="e.g 'i386_defconfig' or 'oldconfig' or ..."
+      ;;
+    *)
+      ;;
+  esac
+
+  echo ""
+  echo "[kernel ${1}]"
+  echo "${msg}"
+}
+
+check_kernel_root() {
+  if [[ ! -d arch || ! -d init ]]; then
+    echo "Make sure you are currently in the path of the kernel root!"
+    exit 1
+  else
+    ROOT=$(pwd -P)
+  fi
+}
+
+request() {
+  local key=""
+  local params=""
+
+  cd ${1}
+  while true; do
+    read -e -p "Input ${1}: " params
+    for param in ${params}; do
+      key=$(find ${ROOT}/${1} -name "${param/armhf/arm}" | wc -l)
+      if [[ ${key} -gt 0 || "x${param}" = "xoldconfig" ]]; then
+        continue
+      fi
+      key="invalid"
+    done
+
+    [ "x${key}" != "xinvalid" ] && break
+  done
+
+  cd ${ROOT}
+
+  echo ${params}
+}
+
+set_target() {
+  local option=""
+  local ret=""
+
+  echo ""
+  echo "If it's your first build, you must do the build all.."
+  read -r -p "What do you wan't build? (all/dtbs/modules)? [A/d/m]: " option
+  case ${option} in
+    [dD][tT][bB][sS]|[dD])
+      ret="dtbs"
+      ;;
+    [mM][oO][dD][uU][lL][eE][sS]|[mM])
+      ret="modules"
+      ;;
+    *)
+      ret="all"
+      ;;
+  esac
+
+  echo ${ret}
+}
+
+main() {
+  local arch=""
+  local cc="" # cross-compiler
+  local config=""
+  local ret=""
+  local target=""
+
+  # Verify that the current working path is the root of the kernel source.
+  check_kernel_root
+
+  # config target's architecture
+  help_msg "arch"
+  ret=$(request "arch" | tail -n 1)
+  arch=${ret/armhf/arm}
+  cc=${CCList[${ret}]}
+
+  # config target's configs
+  help_msg "config"
+  ret=$(request "arch/${arch}/configs" | tail -n 1)
+  config=${ret}
+
+  target=$(set_target | tail -n 1)
+  export ARCH=${arch}
+  export CROSS_COMPILE=${cc}
+  if [[ ${config} == *"sub"* ]]; then
+    export KBUILD_OUTPUT=./build_sub
+  else
+    export KBUILD_OUTPUT=./build
+  fi
+
+  # build
+  echo "make ARCH=${arch} ${config}"
+  make ${config}
+  echo "make ARCH=${arch} CROSS_COMPILE=${cc} ${target} -j$(nproc)"
+  make ${target} -j$(nproc)
+}
+
+main
+
+# vim: ft=sh ts=2 sw=2 sts=2 et
