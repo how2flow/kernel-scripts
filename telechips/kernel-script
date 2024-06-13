@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-DEFAULT="~/.usr/share/kernel-scripts"
+DEFAULT="${HOME}/.usr/share/kernel-scripts"
 PREFIX=${CHECKOUT:-${DEFAULT}}
 
 options=$(getopt -o cfhil -l crosscompile,ftrace,help,install,losetup -- "$@")
