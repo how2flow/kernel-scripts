@@ -132,6 +132,7 @@ main() {
   make ${config}
   echo "make ARCH=${arch} CROSS_COMPILE=${cc} ${target} -j$(nproc)"
   make ${target} -j$(nproc)
+  ./mklinuxmtdimg_64bit.sh
 }
 
 main
