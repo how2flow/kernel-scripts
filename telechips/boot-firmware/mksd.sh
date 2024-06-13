@@ -88,8 +88,12 @@ create_symlink() {
     elif [ $(echo ${idx} | grep "boot" | wc -l) -gt 0 ]; then
       # kernel-sub
       if [ $(echo ${idx} | grep "sub" | wc -l) -eq 1 ]; then
+        kernel_sub=$(cherrypick ${KERNEL} ${target} "build_sub")
+        if [ -z ${kernel_sub} ]; then
         kernel_sub=$(cherrypick ${KERNEL} ${target/_sub/} "build_sub")
-        mv ${kernel_sub} ${kernel_sub/boot/boot_sub/}
+        mv ${kernel_sub} ${kernel_sub/.img/_sub.img}
+        kernel_sub=${kernel_sub/.img/_sub.img}
+        fi
         [ ! -f ${kernel_sub} ] && echo "There is no ${target} in ${KERNEL}"
         rm -rf ${path} && ln -s ${kernel_sub} ${path}
       # kernel-main
