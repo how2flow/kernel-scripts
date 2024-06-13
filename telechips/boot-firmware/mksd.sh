@@ -3,7 +3,7 @@
 # This script must exist in root-path of 'boot-firmware/'
 # written by Steve Jeong (steve@how2flow.net)
 
-set -x
+#set -x
 
 CHIP=("tcc807x")
 K_VER="5.10"
@@ -83,20 +83,19 @@ create_symlink() {
     if [ $(echo ${idx} | grep "bl" | wc -l) -gt 0 ]; then
       uboot=$(cherrypick ${UBOOT} ${target} "build")
       [ ! -f ${uboot} ] && echo "There is no ${target} in ${UBOOT}"
-      [ ! -f ${path} ] && ln -s ${uboot} ${path}
+      rm -rf ${path} && ln -s ${uboot} ${path}
     # kernel: main is equal with sub
     elif [ $(echo ${idx} | grep "boot" | wc -l) -gt 0 ]; then
       # kernel-sub
       if [ $(echo ${idx} | grep "sub" | wc -l) -eq 1 ]; then
-        kernel_sub=$(cherrypick ${KERNEL} ${target/_sub/} "build_sub")
-        mv ${kernel_sub} ${kernel_sub/boot/boot_sub/}
-        [ ! -f ${kernel_sub} ] && echo "There is no ${target} in ${KERNEL}"
-        [ ! -f ${path} ] && ln -s ${kernel_sub} ${path}
+        kernel_sub=$(cherrypick ${KERNEL} Image "build_sub")
+        [ ! -f ${kernel_sub} ] && echo "There is no Image in ${KERNEL}"
+        rm -rf ${path} && ln -s ${kernel_sub} ${path}
       # kernel-main
       else
-        kernel_main=$(cherrynpick ${KERNEL} ${target} "build_sub")
-        [ ! -f ${kernel_main} ] && echo "There is no ${target} in ${KERNEL}"
-        [ ! -f ${path} ] && ln -s ${kernel_main} ${path}
+        kernel_main=$(cherrynpick ${KERNEL} Image "build_sub")
+        [ ! -f ${kernel_main} ] && echo "There is no Image in ${KERNEL}"
+        rm -rf ${path} && ln -s ${kernel_main} ${path}
       fi
     # dtb: main is equal with sub
     elif [ $(echo ${idx} | grep "dtb" | wc -l) -gt 0 ]; then
@@ -104,12 +103,12 @@ create_symlink() {
       if [ $(echo ${idx} | grep "sub" | wc -l) -eq 1 ]; then
         dtb_sub=$(cherrypick ${KERNEL} ${target/_sub/} "build_sub")
         [ ! -f ${dtb_sub} ] && echo "There is no ${target} in ${KERNEL}"
-        [ ! -f ${path} ] && ln -s ${dtb_sub} ${path}
+        rm -rf ${path} && ln -s ${dtb_sub} ${path}
       # dtb-main
       else
         dtb_main=$(cherrynpick ${KERNEL} ${target} "build_sub")
         [ ! -f ${dtb_main} ] && echo "There is no ${target} in ${KERNEL}" 
-        [ ! -f ${path} ] && ln -s ${dtb_main} ${path}
+        rm -rf ${path} && ln -s ${dtb_main} ${path}
       fi
     fi
 
