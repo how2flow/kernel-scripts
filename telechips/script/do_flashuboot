@@ -1,0 +1,46 @@
+#!/bin/bash
+
+check_uboot_root() {
+  if [[ ! -d arch || ! -d board ]]; then
+    echo ""
+    exit 1
+  else
+    ROOT=$(pwd -P)
+  fi
+}
+
+main () {
+  check_uboot_root
+  cd ${ROOT}
+
+  echo "build uboot for main-core"
+  . scripts/envsetup.sh << __EOF
+1
+4
+1
+__EOF
+
+make tcc807x_defconfig telechips_mmc_boot.config
+make -j12
+
+sleep 3
+
+}
+
+sub() {
+  check_uboot_root
+  cd ${ROOT}
+
+  echo "build uboot for sub-core"
+  . scripts/envsetup.sh << __EOF
+1
+4
+2
+__EOF
+
+make tcc807x_subcore_defconfig telechips_mmc_boot.config
+make -j12
+}
+
+main
+sub

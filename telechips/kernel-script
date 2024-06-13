@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Copyright (C) 2024 Steve Jeong <steve@how2flow.net>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>
+
+DEFAULT="~/.usr/share/kernel-scripts"
+PREFIX=${CHECKOUT:-${DEFAULT}}
+
+options=$(getopt -o cfhil -l crosscompile,ftrace,help,install,losetup -- "$@")
+eval set -- "${options}"
+
+Usage() {
+  echo "Usage: kernel-script [OPTIONS]"
+  echo "Options:"
+  echo "  -c, --crosscompile   Perform a cross-compilation of the kernel"
+  echo "  -f, --ftrace         Run ftrace with kernel APIs"
+  echo "                       need root permission"
+  echo "  -l, --losetup        Losetup in loop devices"
+  echo "                       need root permission"
+  echo "  --help               Display this help message"
+  exit 0
+}
+
+while true; do
+  case "$1" in
+    -c|--crosscompile)
+      . "${PREFIX}"/do_crosscompile
+      exit 0
+      ;;
+    -f|--ftrace)
+      . "${PREFIX}"/do_ftrace
+      exit 0
+      ;;
+    -h|--help)
+      Usage
+      ;;
+    -l|--losetup)
+      . "${PREFIX}"/do_losetup
+      exit 0
+      ;;
+    -u|--uboot)
+      . "${PREFIX}"/do_flashuboot
+      exit 0
+      ;;
+    --) shift
+      break
+      ;;
+    *)
+      echo "Not implemented: $1" >&2
+      ;;
+  esac
+  shift
+done
+
+# vim: set ft=sh ts=2 sw=2 sts=2 et
