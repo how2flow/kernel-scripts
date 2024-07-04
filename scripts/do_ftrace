@@ -15,11 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
-set -e
+############################
+# Kernel CONFIG for FTRACE #
+############################
 
-# ftracing script.
-# kernel function call stack. run with root permission.
-# check kernel config...
 # CONFIG_FTRACE=y
 # CONFIG_DYNAMIC_FTRACE=y
 # CONFIG_FUNCTION_TRACER=y
@@ -29,8 +28,8 @@ set -e
 # CONFIG_FUNCTION_PROFILER=y
 # CONFIG_STACK_TRACER=y
 # CONFIG_TRACER_SNAPSHOT=y
-# ...
-# written by Steve Jeong (steve@how2flow.net).
+
+set -e
 
 DEFAULT=$(pwd -P)
 DUMMY=kernel_init
@@ -52,7 +51,8 @@ query_events() {
       continue
     fi
 
-    read -r -p "Have you finished setting up the evnets ([Y]es/[n]o)? : " ans
+    echo "Set events: ${events}"
+    read -r -p "Have you finished setting up the evnets ([Y]es/[n]o) ? : " ans
     case ${ans} in
       [Nn][Oo]|[Nn])
         echo ""
@@ -101,15 +101,15 @@ query_functions() {
       fi
     done
 
-    echo "Set filters: ${filters}"
-    echo ${filters} > ${PREFIX}/set_ftrace_filter
-    if [[ -z ${filters} ]]; then
+    if [ -z "${filters}" ]; then
       echo "The filter is not properly set ..."
       echo "Set filters: ${DUMMY}"
-      echo ${DUMMY} > ${PREFIX}/set_ftrace_filter
+      filters=${DUMMY}
     fi
+    echo ${filters} > ${PREFIX}/set_ftrace_filter
 
-    read -r -p "Have you finished setting up the filter ([Y]es/[n]o)? : " ans
+    echo "Set filters: ${filters}"
+    read -r -p "Have you finished setting up the filter ([Y]es/[n]o) ? : " ans
     case ${ans} in
       [Nn][Oo]|[Nn])
         echo ""
@@ -117,6 +117,7 @@ query_functions() {
         ;;
       *)
         echo "Setup filters ... OK"
+        echo "filters: ${filters}"
         break
         ;;
     esac
@@ -165,6 +166,7 @@ get_ftrace() {
 }
 
 set_ftrace() {
+  local ans
   local tracer
 
   # Set current tracer
@@ -190,7 +192,7 @@ set_ftrace() {
     function_graph)
       echo ${tracer} > ${PREFIX}/current_tracer
         while true; do
-          read -r -p "Set function depth [0 - 9]: " depth
+          read -r -p "Set function depth [0 - 9] : " depth
             if [[ ${depth} =~ ^[0-9]$ ]]; then
               echo "${depth}" > "${PREFIX}/max_graph_depth"
               break
@@ -208,13 +210,32 @@ set_ftrace() {
   # Query things
   echo ""
   echo "=== [Set events] ==="
-  query_events
+  read -r -p "Do you want to set kernel event option [[y]es/[N]o] ? : " ans
+  case ${ans} in
+    [Yy]|[Yy][Ee][Ss])
+      query_events
+      ;;
+    *)
+      echo "Do not set any events ..."
+      sleep 1
+      ;;
+  esac
   echo ""
   if [ $(cat ${PREFIX}/current_tracer) != 'nop' ]; then
     echo "=== [Set function filter] ==="
-    query_functions
-    echo ""
+    read -r -p "Do you want to set kernel function filter [[y]es/[N]o] ? : " ans
+    case ${ans} in
+      [Yy]|[Yy][Ee][Ss])
+        query_functions
+        ;;
+      *)
+        echo "You have not set up a filter, so set up a dummy filter ..."
+        echo ${DUMMY} > ${PREFIX}/set_ftrace_filter
+        sleep 1
+        ;;
+    esac
   fi
+  echo ""
 
   # Ftrace on
   echo 1 > ${PREFIX}/events/enable
