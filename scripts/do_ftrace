@@ -62,6 +62,7 @@ query_events() {
       continue
     fi
 
+    echo ""
     echo "Set events: ${events}"
     read -r -p "Have you finished setting up the evnets ([Y]es/[n]o) ? : " ans
     case ${ans} in
@@ -71,7 +72,7 @@ query_events() {
         ;;
       *)
         cd ${DEFAULT}
-        echo "Set current_tracer ... OK"
+        echo "Setup events ... OK"
         echo "events: ${events}"
         break
         ;;
@@ -89,37 +90,33 @@ query_functions() {
     read -r -p "Add the kernel function filter (e.g. hrtimer_interrupt): " functions
     if [ -z "${functions}" ]; then
       echo ""
-      echo "Function filters must be applied."
-      continue
-    fi
-
-    for f in ${functions}; do
-      echo ""
-      echo "Search function filter: ${f} ..."
-      if [[ ${f} =~ \* ]]; then
-        flag="-c"
-      else
-        flag="-c -Fx"
-      fi
-
-      if [ $(cat ${PREFIX}/available_filter_functions | cut -d " " -f 1 | grep ${flag} ${f}) -gt 0 ]; then
-        filters+="${f} "
-        echo "${f}: Add functions filter!"
-        echo ""
-      else
-        echo "${f}: Invalid Function Filter!"
-        echo ""
-        continue
-      fi
-    done
-
-    if [ -z "${filters}" ]; then
-      echo "The filter is not properly set ..."
-      echo "Set filters: ${DUMMY}"
+      echo "You have not set up a filter, so set up a dummy filter ..."
       filters=${DUMMY}
+    else
+      for f in ${functions}; do
+        echo ""
+        echo "Search function filter: ${f} ..."
+        if [[ ${f} =~ \* ]]; then
+          flag="-c"
+        else
+          flag="-c -Fx"
+        fi
+
+        if [ $(cat ${PREFIX}/available_filter_functions | cut -d " " -f 1 | grep ${flag} ${f}) -gt 0 ]; then
+          filters+="${f} "
+          echo "${f}: Add functions filter!"
+          echo ""
+        else
+          echo "${f}: Invalid Function Filter!"
+          echo ""
+          continue
+        fi
+      done
     fi
+
     echo ${filters} > ${PREFIX}/set_ftrace_filter
 
+    echo ""
     echo "Set filters: ${filters}"
     read -r -p "Have you finished setting up the filter ([Y]es/[n]o) ? : " ans
     case ${ans} in
