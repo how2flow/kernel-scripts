@@ -42,12 +42,23 @@ query_events() {
   while true; do
     cd ${PREFIX}/events
     read -e -p "Enable some kernel events? ${PREFIX}/events/: " events
-    if [ -f ${PREFIX}/events/${events} ]; then
-      echo 1 > ${PREFIX}/events/${events}
-    elif [ -z ${events} ]; then
-      echo "Move on without setting the event."
+    if [ -z "${events}" ]; then
+      echo "Move on without setting the event ..."
     else
-      echo "Invalid events ..."
+      for evt in ${events}; do
+        if [ -f ${PREFIX}/events/${evt} ]; then
+          echo 1 > ${PREFIX}/events/${evt}
+        else
+          echo "${evt}: Invalid events ..."
+          events=EVAL
+          break
+        fi
+      done
+    fi
+
+    if [ "x${events}" = "xEVAL" ]; then
+      echo ""
+      echo "Reset the event all over again ..."
       continue
     fi
 
@@ -61,6 +72,7 @@ query_events() {
       *)
         cd ${DEFAULT}
         echo "Set current_tracer ... OK"
+        echo "events: ${events}"
         break
         ;;
     esac
