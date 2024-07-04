@@ -184,8 +184,20 @@ set_ftrace() {
       ;;
   esac
   case ${tracer} in
-    nop|function|function_graph)
+    nop|function)
       echo ${tracer} > ${PREFIX}/current_tracer
+      ;;
+    function_graph)
+      echo ${tracer} > ${PREFIX}/current_tracer
+        while true; do
+          read -r -p "Set function depth [0 - 9]: " depth
+            if [[ ${depth} =~ ^[0-9]$ ]]; then
+              echo "${depth}" > "${PREFIX}/max_graph_depth"
+              break
+            else
+              echo "Invalid depth. Please enter a number between 0 and 9."
+            fi
+        done
       ;;
     *)
       echo function > ${PREFIX}/current_tracer
