@@ -13,9 +13,9 @@ UBOOT="${HOME}/u-boot/u-boot-core/"
 cherrypick() {
   local cherry
 
-  cherry=$(find ${1} -name ${2})
+  cherry=$(find ${1} -name ${2} | grep ${3})
   if [ -z ${cherry} ]; then
-    cherry=$(find ${1} -name ${2} | grep ${3})
+    cherry=$(find ${1} -name ${2})
   fi
 
   echo ${cherry}
