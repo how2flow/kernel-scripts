@@ -5,7 +5,7 @@
 
 #set -x
 
-CHIP=("tcc807x")
+CHIP=("tcc807x" "tcc897x")
 K_VER="5.10"
 KERNEL="${HOME}/kernel/kernel-${K_VER}/"
 UBOOT="${HOME}/u-boot/u-boot-core/"
@@ -54,7 +54,24 @@ subcore_misc:1024k@
 subcore_env:16k@
 data:0k@
 __EOF
-sleep .5
+      UFS_SIZE=63988301824
+      MMC_SIZE=31268536320
+      sleep .5
+      ;;
+    tcc897x)
+      cat << __EOF > tools/mktcimg/gpt_partition.list
+bl3_ca7_a:2048k@../ca7_bl3.rom
+bl3_ca7_b:2048k@../ca7_bl3.rom
+boot:49152k@../boot.img
+dtb:1024k@../tcc8971-lcn.dtb
+env:1024k@
+misc:1024k@
+data:0k@
+__EOF
+#7818182656
+#15636365312
+      MMC_SIZE=7818182656
+      sleep .5
       ;;
   esac
 }
@@ -138,11 +155,11 @@ make_sd() {
   cd tools/mktcimg/
   case ${target} in
     ufs) # ufs
-      ./mktcimg --parttype gpt --storage_size 63988301824 --fplist gpt_partition.list --outfile SD_Data.fai --area_name "SD Data" --gptfile SD_Data.gpt --sector_size 4096
+      ./mktcimg --parttype gpt --storage_size ${UFS_SIZE} --fplist gpt_partition.list --outfile SD_Data.fai --area_name "SD Data" --gptfile SD_Data.gpt --sector_size 4096
       mv SD_Data* ${root_path}
       ;;
     *) # mmc
-      ./mktcimg --parttype gpt --storage_size 31268536320 --fplist gpt_partition.list --outfile SD_Data.fai --area_name "SD Data" --gptfile SD_Data.gpt
+      ./mktcimg --parttype gpt --storage_size ${MMC_SIZE} --fplist gpt_partition.list --outfile SD_Data.fai --area_name "SD Data" --gptfile SD_Data.gpt
       mv SD_Data* ${root_path}
       ;;
   esac
@@ -151,8 +168,8 @@ make_sd() {
 }
 
 echo "=== Select Chip model ==="
-for ((i=0; i<${CHIP[@]}+1; i++)); do
-  echo "[${i+1}] ${CHIP[$i]}"
+for ((i=0; i<${#CHIP[@]}; i++)); do
+  echo "[$((i+1))] ${CHIP[$i]}"
 done
 
 read -r -p "CHIP: " opt
