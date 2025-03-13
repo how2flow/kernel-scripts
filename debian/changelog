@@ -1,3 +1,9 @@
+kernel-scripts (2.7.5) stable; urgency=medium
+
+  * Add clear trace buffer in init-ftrace
+
+ -- Steve Jeong <steve@how2flow.net>  Thu, 13 Mar 2025 15:50:23 +0900
+
 kernel-scripts (2.7.4) stable; urgency=medium
 
   * Improve ftrace
