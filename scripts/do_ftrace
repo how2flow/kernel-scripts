@@ -151,6 +151,10 @@ init_ftrace() {
     exit 1
   fi
 
+  # Prepare ftrace
+  echo 0 > ${PREFIX}/tracing_on
+  cat ${PREFIX}/trace_pipe > /dev/null
+
   # Init default options
   echo 1 > ${PREFIX}/options/func_stack_trace
   echo 1 > ${PREFIX}/options/sym-offset
