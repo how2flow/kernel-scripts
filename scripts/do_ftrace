@@ -134,7 +134,7 @@ query_functions() {
 }
 
 init_ftrace() {
-  local init
+  local pipe_pid
 
   if [ ! -d ${PREFIX} ]; then
     echo "Please add configs of ftrace"
@@ -153,13 +153,17 @@ init_ftrace() {
 
   # Prepare ftrace
   echo 0 > ${PREFIX}/tracing_on
-  cat ${PREFIX}/trace_pipe > /dev/null
+  cat ${PREFIX}/trace_pipe > /dev/null &
+  pipe_pid=$!
+  disown ${pipe_pid}
 
   # Init default options
   echo 1 > ${PREFIX}/options/func_stack_trace
   echo 1 > ${PREFIX}/options/sym-offset
   sleep .5
   echo "Init defualt options ... OK"
+
+  kill ${pipe_pid} > /dev/null 2>&1
 }
 
 get_ftrace() {
