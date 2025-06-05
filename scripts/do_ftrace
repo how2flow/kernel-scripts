@@ -133,9 +133,18 @@ query_functions() {
   done
 }
 
-init_ftrace() {
+clr_ftrace() {
   local pipe_pid
 
+  cat ${PREFIX}/trace_pipe > /dev/null &
+  pipe_pid=$!
+  disown ${pipe_pid}
+  sleep .5
+
+  echo ${pipe_pid}
+}
+
+init_ftrace() {
   if [ ! -d ${PREFIX} ]; then
     echo "Please add configs of ftrace"
     echo ""
@@ -153,9 +162,6 @@ init_ftrace() {
 
   # Prepare ftrace
   echo 0 > ${PREFIX}/tracing_on
-  cat ${PREFIX}/trace_pipe > /dev/null &
-  pipe_pid=$!
-  disown ${pipe_pid}
 
   # Init default options
   echo 1 > ${PREFIX}/options/func_stack_trace
@@ -163,7 +169,6 @@ init_ftrace() {
   sleep .5
   echo "Init defualt options ... OK"
 
-  kill ${pipe_pid} > /dev/null 2>&1
 }
 
 get_ftrace() {
@@ -184,7 +189,10 @@ get_ftrace() {
 
 set_ftrace() {
   local ans
+  local clr_pid
   local tracer
+
+  clr_pid=$(clr_ftrace)
 
   # Set current tracer
   read -r -p "Init current tracer [[N]op|[F]unction|[G]function_graph] (default: nop) ? : " init
@@ -263,6 +271,8 @@ set_ftrace() {
   echo "Trace on ..."
   echo ""
   sleep 1
+
+  kill ${clr_pid} > /dev/null 2>&1
 }
 
 # EUID
