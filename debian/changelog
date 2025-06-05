@@ -1,3 +1,10 @@
+kernel-scripts (2.7.7) stable; urgency=medium
+
+  * Update ftrace
+  * ftrace: improve tracing clear
+
+ -- Steve Jeong <steve@how2flow.net>  Thu, 05 Jun 2025 13:24:07 +0900
+
 kernel-scripts (2.7.6) stable; urgency=medium
 
   * Update ftrace
